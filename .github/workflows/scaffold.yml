@@ -1,4 +1,4 @@
-name: Scaffold Resume Site (Compact)
+name: Scaffold Resume Site (Compact, fixed)
 
 on:
   workflow_dispatch:
@@ -25,9 +25,10 @@ jobs:
           rm -rf site
           npm create vite@latest site -- --template react
           cd site
+          npm install
           npm i framer-motion react-to-pdf
           npm i -D tailwindcss postcss autoprefixer @tailwindcss/forms
-          npx tailwindcss init -p
+          # Removed: npx tailwindcss init -p (we will write config files manually)
           cd ..
 
       - name: Write config and root files
@@ -39,7 +40,6 @@ jobs:
           EOF
 
           # CommonJS configs to avoid ESM issues in CI
-          mv site/tailwind.config.cjs site/tailwind.config.cjs || true
           cat > site/tailwind.config.cjs << 'EOF'
           /** @type {import('tailwindcss').Config} */
           const forms = require('@tailwindcss/forms')
