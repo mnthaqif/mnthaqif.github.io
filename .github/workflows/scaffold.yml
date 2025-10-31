@@ -428,19 +428,10 @@ jobs:
           )
           EOF
 
-      - name: Sync scaffold to repo root (overwrite-safe)
+      - name: Sync scaffold to repo root (keep .git)
         run: |
-          sudo apt-get update && sudo apt-get install -y rsync
-          # Exclude node_modules to avoid churn; handle rsync code 24 (vanished files) as non-fatal
-          set -e
-          rsync -a --delete --delete-excluded \
-            --exclude 'node_modules/' \
-            --exclude '.git/' \
-            site/ ./ || RS=$?
-          if [ "${RS:-0}" -ne 0 ] && [ "${RS:-0}" -ne 24 ]; then
-            echo "rsync failed with code ${RS}"
-            exit "${RS}"
-          fi
+          # Safely copy generated app into repo root; never touch .git
+          cp -a site/. ./
           rm -rf site
 
       - name: Commit and push
