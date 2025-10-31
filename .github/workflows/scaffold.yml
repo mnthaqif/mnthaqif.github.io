@@ -1,4 +1,4 @@
-name: Scaffold Resume Site
+name: Scaffold Resume Site (Compact)
 
 on:
   workflow_dispatch:
@@ -15,83 +15,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Add project files
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate Vite React app and install deps
         run: |
-          mkdir -p src/components src/sections src/utils src/hooks .github/workflows
+          rm -rf site
+          npm create vite@latest site -- --template react
+          cd site
+          npm i framer-motion react-to-pdf
+          npm i -D tailwindcss postcss autoprefixer @tailwindcss/forms
+          npx tailwindcss init -p
+          cd ..
 
-          cat > .gitignore << 'EOF'
-          # Dependencies
-          node_modules/
-
-          # Production build
-          dist/
-
-          # Logs
-          npm-debug.log*
-          yarn-debug.log*
-          yarn-error.log*
-          pnpm-debug.log*
-
-          # OS
-          .DS_Store
-          EOF
-
-          cat > package.json << 'EOF'
-          {
-            "name": "mnthaqif-resume",
-            "private": true,
-            "version": "1.0.0",
-            "type": "module",
-            "scripts": {
-              "dev": "vite",
-              "build": "vite build",
-              "preview": "vite preview"
-            },
-            "dependencies": {
-              "framer-motion": "^11.3.31",
-              "react": "^18.3.1",
-              "react-dom": "^18.3.1",
-              "react-to-pdf": "^2.0.1"
-            },
-            "devDependencies": {
-              "@tailwindcss/forms": "^0.5.9",
-              "@vitejs/plugin-react": "^4.3.3",
-              "autoprefixer": "^10.4.20",
-              "postcss": "^8.4.47",
-              "tailwindcss": "^3.4.14",
-              "vite": "^5.4.10"
-            }
-          }
-          EOF
-
-          cat > vite.config.js << 'EOF'
+      - name: Write config and root files
+        run: |
+          cat > site/vite.config.js << 'EOF'
           import { defineConfig } from 'vite'
           import react from '@vitejs/plugin-react'
-
-          // User site https://mnthaqif.github.io uses base: '/'
-          export default defineConfig({
-            plugins: [react()],
-            base: '/'
-          })
+          export default defineConfig({ plugins: [react()], base: '/' })
           EOF
 
-          # Use CommonJS for Tailwind/PostCSS to avoid ESM build issues on Actions
-          cat > tailwind.config.cjs << 'EOF'
+          # CommonJS configs to avoid ESM issues in CI
+          mv site/tailwind.config.cjs site/tailwind.config.cjs || true
+          cat > site/tailwind.config.cjs << 'EOF'
           /** @type {import('tailwindcss').Config} */
           const forms = require('@tailwindcss/forms')
-
           module.exports = {
             darkMode: 'class',
             content: ['./index.html', './src/**/*.{js,jsx}'],
             theme: {
               extend: {
                 colors: {
-                  brand: {
-                    DEFAULT: '#4f46e5', // indigo-600
-                    light: '#6366f1',   // indigo-500
-                    dark: '#4338ca'     // indigo-700
-                  },
-                  accent: { DEFAULT: '#14b8a6' } // teal-500
+                  brand: { DEFAULT: '#4f46e5', light: '#6366f1', dark: '#4338ca' },
+                  accent: { DEFAULT: '#14b8a6' }
                 }
               }
             },
@@ -99,16 +58,11 @@ jobs:
           }
           EOF
 
-          cat > postcss.config.cjs << 'EOF'
-          module.exports = {
-            plugins: {
-              tailwindcss: {},
-              autoprefixer: {}
-            }
-          }
+          cat > site/postcss.config.cjs << 'EOF'
+          module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }
           EOF
 
-          cat > index.html << 'EOF'
+          cat > site/index.html << 'EOF'
           <!doctype html>
           <html lang="en" class="scroll-smooth">
             <head>
@@ -117,10 +71,7 @@ jobs:
               <title>Thaqif Rajab · Online Resume</title>
               <meta name="description" content="Professional online resume for Thaqif Rajab" />
               <link rel="preconnect" href="https://fonts.googleapis.com">
-              <link
-                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-                rel="stylesheet"
-              >
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
             </head>
             <body class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
               <div id="root"></div>
@@ -129,56 +80,40 @@ jobs:
           </html>
           EOF
 
-          cat > src/index.css << 'EOF'
+          cat > site/.gitignore << 'EOF'
+          node_modules/
+          dist/
+          npm-debug.log*
+          yarn-debug.log*
+          yarn-error.log*
+          pnpm-debug.log*
+          .DS_Store
+          EOF
+
+      - name: Write base src files
+        run: |
+          mkdir -p site/src/utils site/src/hooks site/src/components site/src/sections
+          cat > site/src/index.css << 'EOF'
           @tailwind base;
           @tailwind components;
           @tailwind utilities;
-
-          :root {
-            --ring: 240 5% 64.9%;
-          }
-
-          * {
-            @apply antialiased;
-          }
-
-          html, body, #root {
-            height: 100%;
-          }
-
-          body {
-            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-          }
-
-          /* Utility containers */
-          .container-px {
-            @apply px-4 sm:px-6 lg:px-8;
-          }
-          .section {
-            @apply container-px max-w-5xl mx-auto py-16 sm:py-20;
-          }
-          .section-title {
-            @apply text-2xl sm:text-3xl font-semibold tracking-tight mb-6;
-          }
-          .card {
-            @apply rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/50 backdrop-blur-sm shadow-sm hover:shadow transition-shadow;
-          }
-          .btn {
-            @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand;
-          }
-          .btn-primary {
-            @apply bg-brand text-white hover:bg-brand-dark;
-          }
-          .btn-ghost {
-            @apply bg-transparent text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800;
-          }
-
-          a.link {
-            @apply text-brand hover:text-brand-light underline-offset-4 hover:underline;
-          }
+          * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+          html, body, #root { height: 100%; }
+          body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+          .container-px { padding-left: 1rem; padding-right: 1rem; }
+          @media (min-width: 640px){ .container-px { padding-left: 1.5rem; padding-right: 1.5rem; } }
+          @media (min-width: 1024px){ .container-px { padding-left: 2rem; padding-right: 2rem; } }
+          .section { max-width: 64rem; margin: 0 auto; padding-top: 4rem; padding-bottom: 4rem; }
+          .section-title { font-weight: 600; font-size: clamp(1.5rem, 2vw, 1.875rem); margin-bottom: 1.5rem; }
+          .card { border-radius: 0.75rem; border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.7); backdrop-filter: blur(6px); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+          .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; }
+          .btn-primary { background:#4f46e5; color:#fff; }
+          .btn-ghost { background:transparent; color:#334155; }
+          a.link { color:#4f46e5; text-decoration:none; }
+          a.link:hover { text-decoration:underline; }
           EOF
 
-          cat > src/utils/motion.js << 'EOF'
+          cat > site/src/utils/motion.js << 'EOF'
           export const fadeInUp = {
             initial: { opacity: 0, y: 16 },
             whileInView: { opacity: 1, y: 0 },
@@ -187,17 +122,14 @@ jobs:
           }
           EOF
 
-          cat > src/hooks/useTheme.js << 'EOF'
+          cat > site/src/hooks/useTheme.js << 'EOF'
           import { useEffect, useState } from 'react'
-
           export function useTheme() {
             const [theme, setTheme] = useState('system')
-
             useEffect(() => {
               const stored = localStorage.getItem('theme')
               if (stored) setTheme(stored)
             }, [])
-
             useEffect(() => {
               const root = document.documentElement
               const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -205,48 +137,37 @@ jobs:
               root.classList.toggle('dark', isDark)
               localStorage.setItem('theme', theme)
             }, [theme])
-
             return { theme, setTheme }
           }
           EOF
 
-          cat > src/components/ThemeToggle.jsx << 'EOF'
+      - name: Write components
+        run: |
+          cat > site/src/components/ThemeToggle.jsx << 'EOF'
           import { useEffect, useState } from 'react'
           import { useTheme } from '../hooks/useTheme'
-
           export default function ThemeToggle() {
             const { theme, setTheme } = useTheme()
             const [mounted, setMounted] = useState(false)
-
             useEffect(() => setMounted(true), [])
             if (!mounted) return null
-
             const next = theme === 'light' ? 'dark' : 'light'
             const label = theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'
-
             return (
-              <button
-                className="btn btn-ghost"
-                onClick={() => setTheme(next)}
-                aria-label={label}
-                title={label}
-              >
-                {theme === 'light' ? <span>🌙</span> : <span>☀️</span>}
+              <button className="btn btn-ghost" onClick={() => setTheme(next)} aria-label={label} title={label}>
+                {theme === 'light' ? '🌙' : '☀️'}
               </button>
             )
           }
           EOF
 
-          cat > src/components/Navbar.jsx << 'EOF'
+          cat > site/src/components/Navbar.jsx << 'EOF'
           import ThemeToggle from './ThemeToggle'
-
           export default function Navbar() {
             return (
               <header className="sticky top-0 z-40 border-b border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-950/60 backdrop-blur supports-[backdrop-filter]:bg-white/50">
                 <nav className="container-px max-w-5xl mx-auto h-14 flex items-center justify-between">
-                  <a href="#hero" className="font-semibold tracking-tight">
-                    Thaqif Rajab
-                  </a>
+                  <a href="#hero" className="font-semibold tracking-tight">Thaqif Rajab</a>
                   <div className="flex items-center gap-2">
                     <a href="#projects" className="btn btn-ghost text-sm">Projects</a>
                     <a href="#contact" className="btn btn-primary text-sm">Contact</a>
@@ -258,41 +179,19 @@ jobs:
           }
           EOF
 
-          cat > src/components/ResumePDF.jsx << 'EOF'
+          cat > site/src/components/ResumePDF.jsx << 'EOF'
           import React, { forwardRef } from 'react'
-
-          /**
-           * Minimal, ATS-friendly, single-column resume layout.
-           * - No icons or decorative graphics
-           * - High contrast, system font stack
-           * - Semantic structure and bullet lists
-           */
           const ResumePDF = forwardRef(function ResumePDF(_, ref) {
             return (
-              <div
-                ref={ref}
-                className="absolute -left-[10000px] top-0 w-[794px] bg-white text-black"
-                style={{
-                  padding: '32px',
-                  lineHeight: 1.5,
-                  fontSize: '12px'
-                }}
-              >
+              <div ref={ref} className="absolute -left-[10000px] top-0 w-[794px] bg-white text-black" style={{ padding: '32px', lineHeight: 1.5, fontSize: '12px' }}>
                 <header>
                   <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>Thaqif Rajab</h1>
-                  <div style={{ fontSize: '12px', color: '#374151' }}>
-                    Johor · thaqif_rajab@yahoo.com · mnthaqif.github.io · github.com/mnthaqif
-                  </div>
+                  <div style={{ fontSize: '12px', color: '#374151' }}>Johor · thaqif_rajab@yahoo.com · mnthaqif.github.io · github.com/mnthaqif</div>
                 </header>
-
                 <section style={{ marginTop: '16px' }}>
                   <h2 style={{ fontSize: '14px', fontWeight: 700, borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>Summary</h2>
-                  <p style={{ marginTop: '8px' }}>
-                    Fullstack developer specializing in React, TypeScript, Node.js, and UI/UX.
-                    Passionate about performant, accessible products and robust design systems.
-                  </p>
+                  <p style={{ marginTop: '8px' }}>Fullstack developer specializing in React, TypeScript, Node.js, and UI/UX. Passionate about performant, accessible products and robust design systems.</p>
                 </section>
-
                 <section style={{ marginTop: '16px' }}>
                   <h2 style={{ fontSize: '14px', fontWeight: 700, borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>Skills</h2>
                   <ul style={{ marginTop: '8px' }}>
@@ -301,81 +200,53 @@ jobs:
                     <li><strong>Tools:</strong> GitHub Actions, Jest, Playwright, Figma</li>
                   </ul>
                 </section>
-
                 <section style={{ marginTop: '16px' }}>
                   <h2 style={{ fontSize: '14px', fontWeight: 700, borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>Experience</h2>
-
                   <article style={{ marginTop: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                      <strong>Senior Fullstack Developer · Company A</strong>
-                      <span>2022 — Present</span>
-                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}><strong>Senior Fullstack Developer · Company A</strong><span>2022 — Present</span></div>
                     <ul style={{ marginTop: '6px', paddingLeft: '18px' }}>
                       <li>Led design system; improved delivery speed by 40%.</li>
                       <li>Architected React/Node platform serving 1M+ monthly users.</li>
                     </ul>
                   </article>
-
                   <article style={{ marginTop: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                      <strong>Frontend Engineer · Company B</strong>
-                      <span>2020 — 2022</span>
-                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}><strong>Frontend Engineer · Company B</strong><span>2020 — 2022</span></div>
                     <ul style={{ marginTop: '6px', paddingLeft: '18px' }}>
                       <li>Built accessible UI components with zero a11y regressions.</li>
                       <li>Optimized performance; reduced LCP by 35%.</li>
                     </ul>
                   </article>
                 </section>
-
                 <section style={{ marginTop: '16px' }}>
                   <h2 style={{ fontSize: '14px', fontWeight: 700, borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>Projects</h2>
                   <ul style={{ marginTop: '8px', paddingLeft: '18px' }}>
-                    <li><strong>Project One</strong> — React, Node, Tailwind. Impact-focused description with metrics.</li>
-                    <li><strong>Project Two</strong> — TypeScript, Express, Postgres. What problem and your role.</li>
+                    <li><strong>Project One</strong> — React, Node, Tailwind.</li>
+                    <li><strong>Project Two</strong> — TypeScript, Express, Postgres.</li>
                   </ul>
                 </section>
-
                 <section style={{ marginTop: '16px' }}>
                   <h2 style={{ fontSize: '14px', fontWeight: 700, borderBottom: '1px solid #e5e7eb', paddingBottom: '4px' }}>Education</h2>
-                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                    <strong>B.Sc. in Computer Science · University Name</strong>
-                    <span>2016 — 2020</span>
-                  </div>
+                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', gap: '8px' }}><strong>B.Sc. in Computer Science · University Name</strong><span>2016 — 2020</span></div>
                 </section>
               </div>
             )
           })
-
           export default ResumePDF
           EOF
 
-          cat > src/sections/Hero.jsx << 'EOF'
+      - name: Write sections
+        run: |
+          cat > site/src/sections/Hero.jsx << 'EOF'
           import { motion } from 'framer-motion'
           import { fadeInUp } from '../utils/motion'
-
           export default function Hero() {
             return (
               <section id="hero" className="section">
-                <motion.div
-                  className="flex flex-col sm:flex-row items-center gap-8"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  viewport={fadeInUp.viewport}
-                  transition={fadeInUp.transition}
-                >
-                  <img
-                    src="https://avatars.githubusercontent.com/u/16253645?v=4"
-                    alt="Portrait of Thaqif Rajab"
-                    className="h-28 w-28 rounded-full object-cover ring-2 ring-brand/30"
-                  />
+                <motion.div className="flex flex-col sm:flex-row items-center gap-8" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition}>
+                  <img src="https://avatars.githubusercontent.com/u/16253645?v=4" alt="Portrait of Thaqif Rajab" className="h-28 w-28 rounded-full object-cover ring-2 ring-brand/30" />
                   <div className="text-center sm:text-left">
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                      Thaqif Rajab
-                    </h1>
-                    <p className="mt-2 text-gray-600 dark:text-gray-300">
-                      Fullstack Web Developer & UI/UX Designer
-                    </p>
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Thaqif Rajab</h1>
+                    <p className="mt-2 text-gray-600 dark:text-gray-300">Fullstack Web Developer & UI/UX Designer</p>
                     <div className="mt-4 flex items-center justify-center sm:justify-start gap-3">
                       <a className="btn btn-primary" href="#contact">Get in touch</a>
                       <a className="btn btn-ghost" href="#projects">See projects</a>
@@ -387,75 +258,38 @@ jobs:
           }
           EOF
 
-          cat > src/sections/About.jsx << 'EOF'
+          cat > site/src/sections/About.jsx << 'EOF'
           import { motion } from 'framer-motion'
           import { fadeInUp } from '../utils/motion'
-
           export default function About() {
             return (
               <section id="about" className="section">
-                <motion.h2
-                  className="section-title"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={fadeInUp.transition}
-                  viewport={fadeInUp.viewport}
-                >
-                  About Me
-                </motion.h2>
-                <motion.p
-                  className="text-gray-700 dark:text-gray-300 leading-7"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={{ ...fadeInUp.transition, delay: 0.05 }}
-                  viewport={fadeInUp.viewport}
-                >
-                  I’m a fullstack developer focused on crafting performant, accessible, and
-                  delightful web experiences. I specialize in React, TypeScript, Node.js,
-                  and design systems, with a strong eye for clean UI and UX. I love turning
-                  complex problems into elegant, scalable solutions.
+                <motion.h2 className="section-title" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={fadeInUp.transition} viewport={fadeInUp.viewport}>About Me</motion.h2>
+                <motion.p className="text-gray-700 dark:text-gray-300 leading-7" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={{ ...fadeInUp.transition, delay: 0.05 }} viewport={fadeInUp.viewport}>
+                  I’m a fullstack developer focused on crafting performant, accessible, and delightful web experiences. I specialize in React, TypeScript, Node.js, and design systems.
                 </motion.p>
               </section>
             )
           }
           EOF
 
-          cat > src/sections/Skills.jsx << 'EOF'
+          cat > site/src/sections/Skills.jsx << 'EOF'
           import { motion } from 'framer-motion'
           import { fadeInUp } from '../utils/motion'
-
           const skills = [
             { group: 'Frontend', items: ['React', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Vite'] },
             { group: 'Backend', items: ['Node.js', 'Express', 'REST', 'PostgreSQL', 'MongoDB'] },
             { group: 'Tools', items: ['GitHub Actions', 'Jest', 'Playwright', 'Figma', 'Storybook'] }
           ]
-
           export default function Skills() {
             return (
               <section id="skills" className="section">
-                <motion.h2
-                  className="section-title"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={fadeInUp.transition}
-                  viewport={fadeInUp.viewport}
-                >
-                  Skills
-                </motion.h2>
+                <motion.h2 className="section-title" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={fadeInUp.transition} viewport={fadeInUp.viewport}>Skills</motion.h2>
                 <div className="grid sm:grid-cols-3 gap-4">
                   {skills.map((group, i) => (
-                    <motion.div
-                      key={group.group}
-                      className="card p-5"
-                      initial={fadeInUp.initial}
-                      whileInView={fadeInUp.whileInView}
-                      transition={{ ...fadeInUp.transition, delay: i * 0.05 }}
-                      viewport={fadeInUp.viewport}
-                    >
+                    <motion.div key={group.group} className="card p-5" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={{ ...fadeInUp.transition, delay: i * 0.05 }} viewport={fadeInUp.viewport}>
                       <h3 className="font-semibold mb-2">{group.group}</h3>
-                      <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                        {group.items.map(s => <li key={s}>• {s}</li>)}
-                      </ul>
+                      <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">{group.items.map(s => <li key={s}>• {s}</li>)}</ul>
                     </motion.div>
                   ))}
                 </div>
@@ -464,62 +298,24 @@ jobs:
           }
           EOF
 
-          cat > src/sections/Projects.jsx << 'EOF'
+          cat > site/src/sections/Projects.jsx << 'EOF'
           import { motion } from 'framer-motion'
           import { fadeInUp } from '../utils/motion'
-
           const projects = [
-            {
-              title: 'Project One',
-              description: 'A concise description highlighting impact and tech stack.',
-              tech: ['React', 'Node', 'Tailwind'],
-              link: '#'
-            },
-            {
-              title: 'Project Two',
-              description: 'Short summary with measurable outcomes if possible.',
-              tech: ['TypeScript', 'Express', 'Postgres'],
-              link: '#'
-            },
-            {
-              title: 'Project Three',
-              description: 'What problem it solves and your contribution.',
-              tech: ['Next.js', 'Framer Motion'],
-              link: '#'
-            }
+            { title: 'Project One', description: 'Impact and tech stack.', tech: ['React','Node','Tailwind'], link: '#' },
+            { title: 'Project Two', description: 'Outcome-focused summary.', tech: ['TypeScript','Express','Postgres'], link: '#' },
+            { title: 'Project Three', description: 'Problem solved and your role.', tech: ['Next.js','Framer Motion'], link: '#' }
           ]
-
           export default function Projects() {
             return (
               <section id="projects" className="section">
-                <motion.h2
-                  className="section-title"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={fadeInUp.transition}
-                  viewport={fadeInUp.viewport}
-                >
-                  Projects
-                </motion.h2>
+                <motion.h2 className="section-title" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={fadeInUp.transition} viewport={fadeInUp.viewport}>Projects</motion.h2>
                 <div className="grid md:grid-cols-3 gap-4">
                   {projects.map((p, i) => (
-                    <motion.article
-                      key={p.title}
-                      className="card p-5 flex flex-col"
-                      initial={fadeInUp.initial}
-                      whileInView={fadeInUp.whileInView}
-                      transition={{ ...fadeInUp.transition, delay: i * 0.05 }}
-                      viewport={fadeInUp.viewport}
-                    >
+                    <motion.article key={p.title} className="card p-5 flex flex-col" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={{ ...fadeInUp.transition, delay: i * 0.05 }} viewport={fadeInUp.viewport}>
                       <h3 className="font-semibold">{p.title}</h3>
                       <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 flex-1">{p.description}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {p.tech.map(t => (
-                          <span key={t} className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">{p.tech.map(t => <span key={t} className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">{t}</span>)}</div>
                       <a href={p.link} className="link mt-4 text-sm" target="_blank" rel="noreferrer">View project</a>
                     </motion.article>
                   ))}
@@ -529,88 +325,33 @@ jobs:
           }
           EOF
 
-          cat > src/sections/Experience.jsx << 'EOF'
+          cat > site/src/sections/Experience.jsx << 'EOF'
           import { motion } from 'framer-motion'
           import { fadeInUp } from '../utils/motion'
-
           const experience = [
-            {
-              role: 'Senior Fullstack Developer',
-              company: 'Company A',
-              period: '2022 — Present',
-              bullets: [
-                'Led development of design system, improving delivery speed by 40%.',
-                'Architected scalable React/Node platform serving 1M+ monthly users.'
-              ]
-            },
-            {
-              role: 'Frontend Engineer',
-              company: 'Company B',
-              period: '2020 — 2022',
-              bullets: [
-                'Built accessible UI components with 0 a11y regressions across releases.',
-                'Implemented performance optimizations, cutting LCP by 35%.'
-              ]
-            }
+            { role: 'Senior Fullstack Developer', company: 'Company A', period: '2022 — Present', bullets: ['Led design system (+40% delivery).','Architected platform (1M+ MAU).'] },
+            { role: 'Frontend Engineer', company: 'Company B', period: '2020 — 2022', bullets: ['A11y components (0 regressions).','Improved LCP by 35%.'] }
           ]
-
-          const education = [
-            {
-              degree: 'B.Sc. in Computer Science',
-              school: 'University Name',
-              period: '2016 — 2020'
-            }
-          ]
-
+          const education = [{ degree: 'B.Sc. in Computer Science', school: 'University Name', period: '2016 — 2020' }]
           export default function Experience() {
             return (
               <section id="experience" className="section">
-                <motion.h2
-                  className="section-title"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={fadeInUp.transition}
-                  viewport={fadeInUp.viewport}
-                >
-                  Experience & Education
-                </motion.h2>
-
+                <motion.h2 className="section-title" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={fadeInUp.transition} viewport={fadeInUp.viewport}>Experience & Education</motion.h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  <motion.div
-                    initial={fadeInUp.initial}
-                    whileInView={fadeInUp.whileInView}
-                    transition={fadeInUp.transition}
-                    viewport={fadeInUp.viewport}
-                    className="space-y-4"
-                  >
+                  <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={fadeInUp.transition} viewport={fadeInUp.viewport} className="space-y-4">
                     <h3 className="font-semibold">Experience</h3>
-                    {experience.map((e) => (
+                    {experience.map(e => (
                       <article key={e.role} className="card p-5">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-medium">{e.role} · {e.company}</h4>
-                          <span className="text-xs text-gray-500">{e.period}</span>
-                        </div>
-                        <ul className="mt-2 list-disc pl-5 text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                          {e.bullets.map((b) => <li key={b}>{b}</li>)}
-                        </ul>
+                        <div className="flex items-center justify-between gap-2"><h4 className="font-medium">{e.role} · {e.company}</h4><span className="text-xs text-gray-500">{e.period}</span></div>
+                        <ul className="mt-2 list-disc pl-5 text-sm text-gray-700 dark:text-gray-300 space-y-1">{e.bullets.map(b => <li key={b}>{b}</li>)}</ul>
                       </article>
                     ))}
                   </motion.div>
-
-                  <motion.div
-                    initial={fadeInUp.initial}
-                    whileInView={fadeInUp.whileInView}
-                    transition={{ ...fadeInUp.transition, delay: 0.05 }}
-                    viewport={fadeInUp.viewport}
-                    className="space-y-4"
-                  >
+                  <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={{ ...fadeInUp.transition, delay: 0.05 }} viewport={fadeInUp.viewport} className="space-y-4">
                     <h3 className="font-semibold">Education</h3>
-                    {education.map((ed) => (
+                    {education.map(ed => (
                       <article key={ed.degree} className="card p-5">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-medium">{ed.degree}</h4>
-                          <span className="text-xs text-gray-500">{ed.period}</span>
-                        </div>
+                        <div className="flex items-center justify-between gap-2"><h4 className="font-medium">{ed.degree}</h4><span className="text-xs text-gray-500">{ed.period}</span></div>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{ed.school}</p>
                       </article>
                     ))}
@@ -621,51 +362,27 @@ jobs:
           }
           EOF
 
-          cat > src/sections/Contact.jsx << 'EOF'
+          cat > site/src/sections/Contact.jsx << 'EOF'
           import { motion } from 'framer-motion'
           import { fadeInUp } from '../utils/motion'
-
           export default function Contact({ onDownload }) {
             return (
               <section id="contact" className="section">
-                <motion.h2
-                  className="section-title"
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={fadeInUp.transition}
-                  viewport={fadeInUp.viewport}
-                >
-                  Contact
-                </motion.h2>
-                <motion.div
-                  initial={fadeInUp.initial}
-                  whileInView={fadeInUp.whileInView}
-                  transition={{ ...fadeInUp.transition, delay: 0.05 }}
-                  viewport={fadeInUp.viewport}
-                  className="card p-6"
-                >
-                  <p className="text-gray-700 dark:text-gray-300">
-                    Email: <a className="link" href="mailto:thaqif_rajab@yahoo.com">thaqif_rajab@yahoo.com</a>
-                  </p>
-                  <p className="text-gray-700 dark:text-gray-300 mt-1">
-                    Website: <a className="link" href="https://mnthaqif.github.io" target="_blank" rel="noreferrer">mnthaqif.github.io</a>
-                  </p>
-                  <p className="text-gray-700 dark:text-gray-300 mt-1">
-                    GitHub: <a className="link" href="https://github.com/mnthaqif" target="_blank" rel="noreferrer">github.com/mnthaqif</a>
-                  </p>
-
-                  <div className="mt-4">
-                    <button className="btn btn-primary" onClick={onDownload}>
-                      Download Resume PDF
-                    </button>
-                  </div>
+                <motion.h2 className="section-title" initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={fadeInUp.transition} viewport={fadeInUp.viewport}>Contact</motion.h2>
+                <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} transition={{ ...fadeInUp.transition, delay: 0.05 }} viewport={fadeInUp.viewport} className="card p-6">
+                  <p className="text-gray-700 dark:text-gray-300">Email: <a className="link" href="mailto:thaqif_rajab@yahoo.com">thaqif_rajab@yahoo.com</a></p>
+                  <p className="text-gray-700 dark:text-gray-300 mt-1">Website: <a className="link" href="https://mnthaqif.github.io" target="_blank" rel="noreferrer">mnthaqif.github.io</a></p>
+                  <p className="text-gray-700 dark:text-gray-300 mt-1">GitHub: <a className="link" href="https://github.com/mnthaqif" target="_blank" rel="noreferrer">github.com/mnthaqif</a></p>
+                  <div className="mt-4"><button className="btn btn-primary" onClick={onDownload}>Download Resume PDF</button></div>
                 </motion.div>
               </section>
             )
           }
           EOF
 
-          cat > src/App.jsx << 'EOF'
+      - name: Write App and main
+        run: |
+          cat > site/src/App.jsx << 'EOF'
           import { usePDF } from 'react-to-pdf'
           import Navbar from './components/Navbar'
           import Hero from './sections/Hero'
@@ -675,13 +392,8 @@ jobs:
           import Experience from './sections/Experience'
           import Contact from './sections/Contact'
           import ResumePDF from './components/ResumePDF'
-
           function App() {
-            // usePDF v2 API: provides targetRef for the PDF content
-            const { toPDF, targetRef } = usePDF({
-              filename: 'Thaqif_Rajab_Resume.pdf'
-            })
-
+            const { toPDF, targetRef } = usePDF({ filename: 'Thaqif_Rajab_Resume.pdf' })
             return (
               <>
                 <Navbar />
@@ -693,22 +405,18 @@ jobs:
                   <Experience />
                   <Contact onDownload={toPDF} />
                 </main>
-
-                {/* Hidden ATS-friendly PDF layout (single column) */}
                 <ResumePDF ref={targetRef} />
               </>
             )
           }
-
           export default App
           EOF
 
-          cat > src/main.jsx << 'EOF'
+          cat > site/src/main.jsx << 'EOF'
           import React from 'react'
           import ReactDOM from 'react-dom/client'
           import App from './App.jsx'
           import './index.css'
-
           ReactDOM.createRoot(document.getElementById('root')).render(
             <React.StrictMode>
               <App />
@@ -716,50 +424,43 @@ jobs:
           )
           EOF
 
+      - name: Add Pages deploy workflow and README
+        run: |
+          mkdir -p .github/workflows
           cat > .github/workflows/deploy.yml << 'EOF'
           name: Deploy to GitHub Pages
-
           on:
             push:
               branches: ["main"]
             workflow_dispatch:
-
           permissions:
             contents: read
             pages: write
             id-token: write
-
           concurrency:
             group: "pages"
             cancel-in-progress: true
-
           jobs:
             build:
               runs-on: ubuntu-latest
               steps:
                 - name: Checkout
                   uses: actions/checkout@v4
-
                 - name: Setup Node
                   uses: actions/setup-node@v4
                   with:
                     node-version: 20
                     cache: 'npm'
-
                 - name: Install dependencies
                   run: npm ci || npm i
-
                 - name: Build
                   run: npm run build
-
                 - name: Setup Pages
                   uses: actions/configure-pages@v5
-
                 - name: Upload artifact
                   uses: actions/upload-pages-artifact@v3
                   with:
                     path: './dist'
-
             deploy:
               needs: build
               runs-on: ubuntu-latest
@@ -772,10 +473,21 @@ jobs:
                   uses: actions/deploy-pages@v4
           EOF
 
-      - name: Commit and push project files
+          cat > site/README.md << 'EOF'
+          # Online Resume (React + Tailwind + Framer Motion + react-to-pdf)
+
+          Minimal personal resume site with dark/light mode, animations, and ATS-friendly PDF export.
+
+          Live: https://mnthaqif.github.io
+          EOF
+
+      - name: Move scaffold to repo root and commit
         run: |
+          shopt -s dotglob
+          mv site/* ./
+          rm -rf site
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Initialize resume site (React + Tailwind + Framer Motion + react-to-pdf) and Pages workflow" || echo "Nothing to commit"
+          git commit -m "Scaffold resume site and add Pages deploy workflow" || echo "Nothing to commit"
           git push
