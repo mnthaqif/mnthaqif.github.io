@@ -431,7 +431,16 @@ jobs:
       - name: Sync scaffold to repo root (overwrite-safe)
         run: |
           sudo apt-get update && sudo apt-get install -y rsync
-          rsync -a --delete site/ ./
+          # Exclude node_modules to avoid churn; handle rsync code 24 (vanished files) as non-fatal
+          set -e
+          rsync -a --delete --delete-excluded \
+            --exclude 'node_modules/' \
+            --exclude '.git/' \
+            site/ ./ || RS=$?
+          if [ "${RS:-0}" -ne 0 ] && [ "${RS:-0}" -ne 24 ]; then
+            echo "rsync failed with code ${RS}"
+            exit "${RS}"
+          fi
           rm -rf site
 
       - name: Commit and push
