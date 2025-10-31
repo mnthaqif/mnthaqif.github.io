@@ -1,4 +1,4 @@
-name: Scaffold Resume Site (Compact, fixed)
+name: Scaffold Resume Site (Deploy inline)
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
           npm install
           npm i framer-motion react-to-pdf
           npm i -D tailwindcss postcss autoprefixer @tailwindcss/forms
-          # Removed: npx tailwindcss init -p (we will write config files manually)
+          # No `npx tailwindcss init -p`—we’ll write config files manually
           cd ..
 
       - name: Write config and root files
@@ -39,7 +39,6 @@ jobs:
           export default defineConfig({ plugins: [react()], base: '/' })
           EOF
 
-          # CommonJS configs to avoid ESM issues in CI
           cat > site/tailwind.config.cjs << 'EOF'
           /** @type {import('tailwindcss').Config} */
           const forms = require('@tailwindcss/forms')
@@ -424,63 +423,6 @@ jobs:
           )
           EOF
 
-      - name: Add Pages deploy workflow and README
-        run: |
-          mkdir -p .github/workflows
-          cat > .github/workflows/deploy.yml << 'EOF'
-          name: Deploy to GitHub Pages
-          on:
-            push:
-              branches: ["main"]
-            workflow_dispatch:
-          permissions:
-            contents: read
-            pages: write
-            id-token: write
-          concurrency:
-            group: "pages"
-            cancel-in-progress: true
-          jobs:
-            build:
-              runs-on: ubuntu-latest
-              steps:
-                - name: Checkout
-                  uses: actions/checkout@v4
-                - name: Setup Node
-                  uses: actions/setup-node@v4
-                  with:
-                    node-version: 20
-                    cache: 'npm'
-                - name: Install dependencies
-                  run: npm ci || npm i
-                - name: Build
-                  run: npm run build
-                - name: Setup Pages
-                  uses: actions/configure-pages@v5
-                - name: Upload artifact
-                  uses: actions/upload-pages-artifact@v3
-                  with:
-                    path: './dist'
-            deploy:
-              needs: build
-              runs-on: ubuntu-latest
-              environment:
-                name: github-pages
-                url: ${{ steps.deployment.outputs.page_url }}
-              steps:
-                - name: Deploy to GitHub Pages
-                  id: deployment
-                  uses: actions/deploy-pages@v4
-          EOF
-
-          cat > site/README.md << 'EOF'
-          # Online Resume (React + Tailwind + Framer Motion + react-to-pdf)
-
-          Minimal personal resume site with dark/light mode, animations, and ATS-friendly PDF export.
-
-          Live: https://mnthaqif.github.io
-          EOF
-
       - name: Move scaffold to repo root and commit
         run: |
           shopt -s dotglob
@@ -489,5 +431,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Scaffold resume site and add Pages deploy workflow" || echo "Nothing to commit"
+          git commit -m "Scaffold resume site (React + Tailwind + Framer Motion + react-to-pdf)" || echo "Nothing to commit"
           git push
+
+      - name: Install dependencies (root)
+        run: npm ci || npm i
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
