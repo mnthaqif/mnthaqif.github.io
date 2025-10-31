@@ -45,9 +45,7 @@ jobs:
             "scripts": {
               "dev": "vite",
               "build": "vite build",
-              "preview": "vite preview",
-              "predeploy": "vite build",
-              "deploy": "gh-pages -d dist -b gh-pages"
+              "preview": "vite preview"
             },
             "dependencies": {
               "framer-motion": "^11.3.31",
@@ -59,7 +57,6 @@ jobs:
               "@tailwindcss/forms": "^0.5.9",
               "@vitejs/plugin-react": "^4.3.3",
               "autoprefixer": "^10.4.20",
-              "gh-pages": "^6.1.1",
               "postcss": "^8.4.47",
               "tailwindcss": "^3.4.14",
               "vite": "^5.4.10"
@@ -78,20 +75,12 @@ jobs:
           })
           EOF
 
-          cat > postcss.config.js << 'EOF'
-          export default {
-            plugins: {
-              tailwindcss: {},
-              autoprefixer: {}
-            }
-          }
-          EOF
-
-          cat > tailwind.config.js << 'EOF'
+          # Use CommonJS for Tailwind/PostCSS to avoid ESM build issues on Actions
+          cat > tailwind.config.cjs << 'EOF'
           /** @type {import('tailwindcss').Config} */
-          import forms from '@tailwindcss/forms'
+          const forms = require('@tailwindcss/forms')
 
-          export default {
+          module.exports = {
             darkMode: 'class',
             content: ['./index.html', './src/**/*.{js,jsx}'],
             theme: {
@@ -107,6 +96,15 @@ jobs:
               }
             },
             plugins: [forms]
+          }
+          EOF
+
+          cat > postcss.config.cjs << 'EOF'
+          module.exports = {
+            plugins: {
+              tailwindcss: {},
+              autoprefixer: {}
+            }
           }
           EOF
 
@@ -772,42 +770,6 @@ jobs:
                 - name: Deploy to GitHub Pages
                   id: deployment
                   uses: actions/deploy-pages@v4
-          EOF
-
-          cat > README.md << 'EOF'
-          # Online Resume (React + Tailwind + Framer Motion + react-to-pdf)
-
-          A minimalist, professional personal resume site with dark/light mode, smooth animations, and an ATS-friendly PDF export.
-
-          ## Live site
-
-          Once the first GitHub Actions run completes, your site will be available at: https://mnthaqif.github.io
-
-          ## Tech
-          - React (Vite)
-          - Tailwind CSS (dark mode via \`class\`)
-          - Framer Motion (fade-in / slide-up on scroll)
-          - react-to-pdf (A4 single-column export)
-          - GitHub Pages via Actions
-
-          ## Local Setup (optional)
-          1. Install dependencies
-             \`\`\`bash
-             npm i
-             \`\`\`
-          2. Run dev server
-             \`\`\`bash
-             npm run dev
-             \`\`\`
-
-          ## PDF Export
-          - Click "Download Resume PDF" in the Contact section.
-          - The export uses a dedicated single-column, semantic \`ResumePDF\` component for ATS-friendliness.
-          - To tweak print spacing, adjust inline styles in \`ResumePDF.jsx\` (font size, padding).
-
-          ## Deployment
-          - This repo uses GitHub Actions to build and deploy on each push to \`main\`.
-          - No local build required.
           EOF
 
       - name: Commit and push project files
