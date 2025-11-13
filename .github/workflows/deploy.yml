@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'     # use Node 20 (Vite v7 requires >=20.19)
           cache: 'npm'
 
       - name: Install dependencies
