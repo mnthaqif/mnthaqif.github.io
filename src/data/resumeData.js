@@ -1,14 +1,13 @@
 export const resumeData = {
   personal: {
-    name: "Muhammad Nathaqif",
+    name: "Muhammad Nur Thaqif",
     title: "Full-Stack Developer",
-    email: "mnthaqif@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
+    email: "thaqif_rajab@yahoo.com",
+    phone: "017-7168361",
+    location: "Melaka, Malaysia",
     website: "https://mnthaqif.github.io",
     github: "https://github.com/mnthaqif",
-    linkedin: "https://linkedin.com/in/mnthaqif",
-    photo: "https://ui-avatars.com/api/?name=Muhammad+Nathaqif&size=200&background=0ea5e9&color=fff&bold=true"
+    linkedin: "https://www.linkedin.com/in/thaqif-rajab/",
   },
   
   about: {
@@ -74,17 +73,11 @@ export const resumeData = {
   
   education: [
     {
-      institution: "University of California, Berkeley",
-      degree: "Bachelor of Science in Computer Science",
-      location: "Berkeley, CA",
-      startDate: "2014",
-      endDate: "2018",
-      gpa: "3.8/4.0",
-      achievements: [
-        "Dean's List all semesters",
-        "President of Computer Science Club",
-        "Published research paper on machine learning algorithms"
-      ]
+      institution: "Universiti Teknologi Malaysia (UTM)",
+      degree: "Bachelor of Computer Science (Bioinformatics)",
+      location: "Skudai, Johor",
+      startDate: "2013",
+      endDate: "2017",
     }
   ],
   
