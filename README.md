@@ -1,4 +1,4 @@
-# Muhammad Nathaqif - Portfolio Website
+# Portfolio Website
 
 A professional, clean, and minimalist online resume built with React, Tailwind CSS, and Framer Motion. Features a dark/light mode toggle and ATS-friendly PDF download capability.
 
