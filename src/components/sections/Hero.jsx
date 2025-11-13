@@ -1,11 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import avatar from '../assets/thaqif.jpg'; // place your thaqif.jpg in src/assets/
+import avatar from '../../assets/thaqif.jpg'; // <-- fixed relative path
 
 /**
- * Hero - uses a code-only background (SVG + gradient) so no external hero-bg image required.
- * - Avatar: imported from src/assets/thaqif.jpg (bundler will handle hashing and paths)
- * - Decorative SVG blobs + gradient overlay create a modern, "cool" background
+ * Hero - SVG gradient background, avatar imported from src/assets/thaqif.jpg
  */
 const Hero = () => {
   return (
@@ -16,7 +14,6 @@ const Hero = () => {
       transition={{ duration: 0.9 }}
       aria-label="Hero"
     >
-      {/* SVG decorative background - code-only, responsive, accessible (aria-hidden) */}
       <svg
         className="absolute inset-0 w-full h-full -z-10"
         viewBox="0 0 1200 800"
@@ -38,7 +35,6 @@ const Hero = () => {
           </filter>
         </defs>
 
-        {/* Large blurred blob */}
         <g filter="url(#blurMe)">
           <path
             d="M300 50 C 420 10, 600 10, 740 80 C 880 150, 940 300, 820 420 C 700 540, 420 580, 260 500 C 100 420, 180 200, 300 50 Z"
@@ -48,7 +44,6 @@ const Hero = () => {
           />
         </g>
 
-        {/* Smaller soft overlay */}
         <g filter="url(#blurMe)">
           <path
             d="M950 200 C 1000 80, 1180 60, 1250 170 C 1320 280, 1210 380, 1080 430 C 950 480, 870 420, 820 340 C 770 260, 880 320, 950 200 Z"
@@ -58,11 +53,9 @@ const Hero = () => {
           />
         </g>
 
-        {/* subtle radial vignette for depth */}
         <rect width="100%" height="100%" fill="url(#g1)" opacity="0.06" />
       </svg>
 
-      {/* dark overlay for contrast */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/30 -z-5" aria-hidden="true" />
 
       <div className="relative z-10 text-center px-6 sm:px-8 lg:px-12 max-w-3xl">
