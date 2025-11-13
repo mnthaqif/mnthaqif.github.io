@@ -11,12 +11,15 @@ export const resumeData = {
   },
   
   about: {
-    summary: "Passionate Full-Stack Developer with 5+ years of experience building scalable web applications and leading development teams. Specialized in React, Node.js, and cloud architecture. I love creating elegant solutions to complex problems and mentoring junior developers.",
+    summary: "Experienced Programmer with over 5 years in web development, specializing in both frontend and backend technologies. Skilled in JavaScript, TypeScript, React.js, Node.js, and PHP. Strong background in developing responsive web applications, managing databases, and improving system performance. Able to work effectively in team environments using Agile methodologies and version control tools such as GitLab and GitHub.",
     highlights: [
-      "Led development of products serving 100K+ users",
-      "Expert in React, TypeScript, and modern web technologies",
-      "Strong advocate for clean code and best practices",
-      "Active open-source contributor"
+      "Full Stack Development (Frontend & Backend)",
+      "Skilled in React.js, NestJS, Node.js, PHP, and MySQL",
+      "Hands-on experience with Kendo UI, Tailwind CSS, and Bootstrap",
+      "Familiar with Agile/Scrum workflow using Jira",
+      "Effective problem-solving and debugging skills",
+      "Experience with version control tools (GitLab, GitHub)",
+      "Committed to writing clean, maintainable, and efficient code"
     ]
   },
   
@@ -31,42 +34,47 @@ export const resumeData = {
   
   experience: [
     {
-      company: "Tech Innovations Inc.",
-      position: "Senior Full-Stack Developer",
-      location: "San Francisco, CA",
-      startDate: "Jan 2021",
+      company: "CTRM Aero Composites Sdn. Bhd.",
+      position: "Full-Stack Developer",
+      location: "Batu Berendam, Melaka",
+      startDate: "Apr 2023",
       endDate: "Present",
       description: [
-        "Lead a team of 5 developers in building a SaaS platform serving 100K+ active users",
-        "Architected and implemented microservices infrastructure using Node.js and Docker",
-        "Improved application performance by 40% through code optimization and caching strategies",
-        "Mentored junior developers and established coding standards and best practices"
+        "Develop and maintain full-stack web applications using React.js, TypeScript, Node.js, and NestJS.",
+        "Integrate backend services with MySQL using Sequelize ORM for efficient data management.",
+        "Implement UI components and dashboards using Kendo UI, Tailwind CSS, and HTML/CSS.",
+        "Collaborate with cross-functional teams using GitLab and Jira following Agile methodology.",
+        "Optimize and refactor existing systems for performance, scalability, and maintainability.",
+        "Participate in code reviews, requirement analysis, and system enhancements for internal applications.",
+        "Fixed bugs and implemented new features based on user feedback"
       ]
     },
     {
-      company: "StartupXYZ",
-      position: "Full-Stack Developer",
+      company: "EDESS Education Development and Solutions Specialist Sdn. Bhd.",
+      position: "PHP Programmer",
       location: "Remote",
-      startDate: "Jun 2019",
-      endDate: "Dec 2020",
+      startDate: "Jan 2021",
+      endDate: "Mac 2023",
       description: [
-        "Built and maintained multiple React-based web applications from scratch",
-        "Developed RESTful APIs using Node.js and Express with PostgreSQL database",
-        "Implemented real-time features using WebSockets and Socket.io",
-        "Collaborated with designers to create pixel-perfect responsive UIs"
+        "Designed and developed education management systems using PHP, MySQL, and Bootstrap.",
+        "Created dynamic web pages and interactive features using JavaScript, jQuery, and HTML/CSS.",
+        "Maintained and optimized SQL queries and backend logic for improved performance.",
+        "Collaborated with the development team using GitLab for version control and deployment management.",
+        "Optimize and refactor existing systems for performance, scalability, and maintainability."
       ]
     },
     {
-      company: "Digital Solutions Co.",
-      position: "Junior Developer",
+      company: "Integrasys Solution Sdn. Bhd.",
+      position: "Frontend Developer",
       location: "New York, NY",
       startDate: "Jan 2018",
       endDate: "May 2019",
       description: [
-        "Developed responsive web applications using React and modern JavaScript",
-        "Contributed to backend development using Python and Django",
-        "Participated in agile development processes and code reviews",
-        "Fixed bugs and implemented new features based on user feedback"
+        "Developed responsive front-end interfaces using HTML5, CSS, and Bootstrap.",
+        "Implemented and customized UI layouts to improve user experience and accessibility.",
+        "Collaborated with the development team using GitLab for version control and deployment management.",
+        "Fixed bugs and implemented new features based on user feedback.",
+        "Ensured cross-browser compatibility and optimized web pages for performance."
       ]
     }
   ],
