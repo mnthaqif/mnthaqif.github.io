@@ -50,51 +50,25 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // denser but still balanced star distribution (percent-based)
+  // star positions (percent-based)
   const stars = [
-    { x: 4, y: 8, r: 1.1, d: 0.1 },
-    { x: 10, y: 18, r: 1.3, d: 0.4 },
-    { x: 18, y: 6, r: 1.0, d: 0.2 },
-    { x: 26, y: 14, r: 1.6, d: 0.7 },
-    { x: 34, y: 4, r: 1.2, d: 0.3 },
-    { x: 42, y: 10, r: 1.0, d: 0.9 },
-    { x: 50, y: 6, r: 1.4, d: 0.6 },
-    { x: 58, y: 12, r: 1.1, d: 0.8 },
-    { x: 66, y: 7, r: 1.0, d: 1.1 },
-    { x: 74, y: 20, r: 1.3, d: 0.5 },
-    { x: 82, y: 9, r: 1.2, d: 0.9 },
-    { x: 90, y: 5, r: 0.9, d: 0.2 },
-
-    { x: 8, y: 26, r: 0.9, d: 1.3 },
-    { x: 20, y: 24, r: 1.0, d: 0.5 },
-    { x: 28, y: 22, r: 1.3, d: 0.3 },
-    { x: 36, y: 28, r: 0.9, d: 1.4 },
-    { x: 46, y: 30, r: 1.2, d: 0.6 },
-    { x: 56, y: 26, r: 1.0, d: 0.8 },
-    { x: 64, y: 32, r: 1.1, d: 1.0 },
-    { x: 72, y: 30, r: 0.8, d: 0.7 },
-    { x: 80, y: 28, r: 1.0, d: 0.9 },
-    { x: 88, y: 26, r: 0.9, d: 0.4 },
-
-    // more scattered stars across whole page (not too dense)
-    { x: 6, y: 40, r: 0.8, d: 1.0 },
-    { x: 16, y: 50, r: 0.7, d: 0.6 },
-    { x: 34, y: 48, r: 0.9, d: 0.9 },
-    { x: 52, y: 44, r: 1.0, d: 0.3 },
-    { x: 70, y: 46, r: 0.8, d: 0.7 },
-    { x: 86, y: 36, r: 0.9, d: 0.5 },
-
-    { x: 12, y: 60, r: 0.6, d: 1.2 },
-    { x: 28, y: 64, r: 0.8, d: 0.8 },
-    { x: 44, y: 62, r: 0.7, d: 0.4 },
-    { x: 60, y: 68, r: 0.6, d: 1.0 },
-    { x: 76, y: 58, r: 0.9, d: 0.2 },
-    { x: 92, y: 52, r: 0.7, d: 0.6 },
-
-    { x: 22, y: 10, r: 0.6, d: 0.2 },
-    { x: 38, y: 14, r: 0.5, d: 0.45 },
-    { x: 54, y: 8, r: 0.5, d: 0.65 },
-    { x: 68, y: 18, r: 0.6, d: 0.95 },
+    { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
+    { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
+    { x: 34, y: 4, r: 1.2, d: 0.3 }, { x: 42, y: 10, r: 1.0, d: 0.9 },
+    { x: 50, y: 6, r: 1.4, d: 0.6 }, { x: 58, y: 12, r: 1.1, d: 0.8 },
+    { x: 66, y: 7, r: 1.0, d: 1.1 }, { x: 74, y: 20, r: 1.3, d: 0.5 },
+    { x: 82, y: 9, r: 1.2, d: 0.9 }, { x: 90, y: 5, r: 0.9, d: 0.2 },
+    { x: 8, y: 26, r: 0.9, d: 1.3 }, { x: 20, y: 24, r: 1.0, d: 0.5 },
+    { x: 28, y: 22, r: 1.3, d: 0.3 }, { x: 36, y: 28, r: 0.9, d: 1.4 },
+    { x: 46, y: 30, r: 1.2, d: 0.6 }, { x: 56, y: 26, r: 1.0, d: 0.8 },
+    { x: 64, y: 32, r: 1.1, d: 1.0 }, { x: 72, y: 30, r: 0.8, d: 0.7 },
+    { x: 80, y: 28, r: 1.0, d: 0.9 }, { x: 88, y: 26, r: 0.9, d: 0.4 },
+    { x: 6, y: 40, r: 0.8, d: 1.0 }, { x: 16, y: 50, r: 0.7, d: 0.6 },
+    { x: 34, y: 48, r: 0.9, d: 0.9 }, { x: 52, y: 44, r: 1.0, d: 0.3 },
+    { x: 70, y: 46, r: 0.8, d: 0.7 }, { x: 86, y: 36, r: 0.9, d: 0.5 },
+    { x: 12, y: 60, r: 0.6, d: 1.2 }, { x: 28, y: 64, r: 0.8, d: 0.8 },
+    { x: 44, y: 62, r: 0.7, d: 0.4 }, { x: 60, y: 68, r: 0.6, d: 1.0 },
+    { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
   return (
@@ -112,7 +86,7 @@ const Hero = () => {
         }
       />
 
-      {/* subtle blurred background blobs (kept soft) */}
+      {/* subtle blurred background blobs */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{ zIndex: -40 }}
@@ -144,11 +118,10 @@ const Hero = () => {
         </motion.g>
       </svg>
 
-      {/* Dark-sky: moon (SVG with animated phase + glow), improved clouds and many twinkling stars */}
+      {/* Dark-sky: moon (SVG with crescent mask + glow), clouds, stars */}
       <div className="absolute inset-0 pointer-events-none -z-20">
-        {/* show only in dark mode */}
         <div className="hidden dark:block w-full h-full">
-          {/* moon as SVG so it scales crisply and always visible on small screens */}
+          {/* crescent moon (SVG) */}
           <motion.svg
             aria-hidden="true"
             viewBox="0 0 120 120"
@@ -159,26 +132,28 @@ const Hero = () => {
             style={{ zIndex: -18 }}
           >
             <defs>
+              {/* moon surface gradient */}
               <radialGradient id="moonG2" cx="35%" cy="22%">
                 <stop offset="0%" stopColor="#fffde6" stopOpacity="1" />
                 <stop offset="60%" stopColor="#fff2ab" stopOpacity="1" />
                 <stop offset="100%" stopColor="#f0d87f" stopOpacity="1" />
               </radialGradient>
 
-              {/* mask for phase: white reveals moon, moving dark circle hides to create phases */}
+              {/* mask for crescent phase */}
               <mask id="phaseMask">
                 <rect x="0" y="0" width="120" height="120" fill="white" />
                 <motion.circle
-                  cx="72"
+                  cx="82"
                   cy="60"
                   r="36"
                   fill="black"
-                  animate={{ cx: [90, 72, 48, 72, 90] }}
+                  animate={{ cx: [88, 82, 76, 82, 88] }}
                   transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
                 />
               </mask>
 
-              <filter id="moonGlow2" x="-80%" y="-80%" width="260%" height="260%">
+              {/* glow filter for moon */}
+              <filter id="moonGlow2" x="-120%" y="-120%" width="340%" height="340%">
                 <feGaussianBlur stdDeviation="10" result="b" />
                 <feMerge>
                   <feMergeNode in="b" />
@@ -187,18 +162,40 @@ const Hero = () => {
               </filter>
             </defs>
 
-            {/* glow group */}
+            {/* glow group (applies mask so only halo around visible crescent shows) */}
             <g style={{ filter: 'url(#moonGlow2)' }}>
               <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
             </g>
 
-            {/* craters */}
+            {/* pulsing halo (subtle, behind moon) */}
+            <motion.circle
+              cx="60"
+              cy="60"
+              r="48"
+              fill="rgba(240,220,120,0.06)"
+              animate={{ opacity: [0.04, 0.12, 0.04], scale: [1, 1.03, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            {/* moon body with crescent mask applied */}
+            <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
+
+            {/* subtle highlight arc for crescent depth */}
+            <path
+              d="M92 60 A32 32 0 0 1 52 92"
+              fill="none"
+              stroke="rgba(255,255,255,0.18)"
+              strokeWidth="1.2"
+              opacity="0.22"
+            />
+
+            {/* small craters */}
             <circle cx="46" cy="62" r="4.2" fill="rgba(0,0,0,0.06)" opacity="0.95" />
             <circle cx="74" cy="78" r="3.2" fill="rgba(0,0,0,0.05)" opacity="0.95" />
             <circle cx="86" cy="54" r="2.8" fill="rgba(0,0,0,0.04)" opacity="0.95" />
           </motion.svg>
 
-          {/* large cloud overlay that drifts across the whole page (soft and subtle) */}
+          {/* drifting cloud clusters (large, soft) */}
           <motion.div
             aria-hidden="true"
             initial={{ opacity: 0.0 }}
@@ -207,12 +204,7 @@ const Hero = () => {
             className="absolute inset-0 -z-19"
             style={{ pointerEvents: 'none' }}
           >
-            <svg
-              viewBox="0 0 1600 900"
-              className="w-full h-full"
-              preserveAspectRatio="xMidYMid slice"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg viewBox="0 0 1600 900" className="w-full h-full" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <filter id="cloudBlurFull" x="-60%" y="-60%" width="260%" height="260%">
                   <feGaussianBlur stdDeviation="24" />
@@ -256,7 +248,7 @@ const Hero = () => {
             </svg>
           </motion.div>
 
-          {/* stars + layered clouds SVG */}
+          {/* stars + layered cloud detail */}
           <svg
             className="w-full h-full"
             viewBox="0 0 1200 700"
@@ -276,7 +268,6 @@ const Hero = () => {
               </linearGradient>
             </defs>
 
-            {/* multiple layered cloud groups for depth */}
             <motion.g
               filter="url(#cloudBlur2)"
               initial={{ x: 0 }}
@@ -333,11 +324,10 @@ const Hero = () => {
               </g>
             </motion.g>
 
-            {/* star field: many stars with varied sizes/delays to increase pleasant density */}
+            {/* star field */}
             {stars.map((s, idx) => {
               const cx = (s.x / 100) * 1200;
               const cy = (s.y / 100) * 700;
-              // subtle random jitter for a few stars (deterministic here by index)
               const jitterX = (idx % 3) * 0.9;
               const jitterY = (idx % 4) * -0.6;
               return (
