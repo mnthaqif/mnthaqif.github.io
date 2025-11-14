@@ -74,10 +74,10 @@ const Hero = () => {
   return (
     <section
       aria-label="Hero"
-      className="min-h-screen flex items-center justify-center relative transition-colors duration-300 overflow-visible"
+      className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
       style={{ height: '100vh' }}
     >
-      {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode */}
+      {/* Background gradient */}
       <div
         className={
           'absolute inset-0 -z-30 transition-colors duration-300 ' +
@@ -86,10 +86,9 @@ const Hero = () => {
         }
       />
 
-      {/* subtle blurred background blobs */}
+      {/* subtle blurred blobs (decorative) */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ zIndex: -40 }}
+        className="absolute inset-0 w-full h-full pointer-events-none -z-20"
         viewBox="0 0 1200 700"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
@@ -118,29 +117,27 @@ const Hero = () => {
         </motion.g>
       </svg>
 
-      {/* Dark-sky: moon (SVG with crescent mask + glow), clouds, stars */}
-      <div className="absolute inset-0 pointer-events-none -z-20">
+      {/* Night-sky layer (moon, smoke-like clouds, stars) */}
+      <div className="absolute inset-0 pointer-events-none -z-10">
         <div className="hidden dark:block w-full h-full">
-          {/* crescent moon (SVG) */}
+          {/* Moon (crescent + glow) */}
           <motion.svg
             aria-hidden="true"
             viewBox="0 0 120 120"
-            className="absolute left-3 top-3 md:left-20 md:top-8 w-16 h-16 md:w-28 md:h-28"
+            className="absolute left-4 top-4 md:left-20 md:top-12 w-16 h-16 md:w-28 md:h-28"
             initial={{ x: -2 }}
             animate={{ x: [0, 3, 0], y: [0, -2, 0], rotate: [0, 0.6, 0] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ zIndex: -18 }}
+            style={{ zIndex: -9 }}
           >
             <defs>
-              {/* moon surface gradient */}
-              <radialGradient id="moonG2" cx="35%" cy="22%">
+              <radialGradient id="moonG" cx="30%" cy="30%">
                 <stop offset="0%" stopColor="#fffde6" stopOpacity="1" />
                 <stop offset="60%" stopColor="#fff2ab" stopOpacity="1" />
                 <stop offset="100%" stopColor="#f0d87f" stopOpacity="1" />
               </radialGradient>
 
-              {/* mask for crescent phase */}
-              <mask id="phaseMask">
+              <mask id="crescentMask">
                 <rect x="0" y="0" width="120" height="120" fill="white" />
                 <motion.circle
                   cx="82"
@@ -148,183 +145,110 @@ const Hero = () => {
                   r="36"
                   fill="black"
                   animate={{ cx: [88, 82, 76, 82, 88] }}
-                  transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+                  transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                 />
               </mask>
 
-              {/* glow filter for moon */}
-              <filter id="moonGlow2" x="-120%" y="-120%" width="340%" height="340%">
-                <feGaussianBlur stdDeviation="10" result="b" />
+              {/* smaller blur for a tighter halo (gives clearer moon) */}
+              <filter id="moonGlowTight" x="-90%" y="-90%" width="280%" height="280%">
+                <feGaussianBlur stdDeviation="6" result="b" />
                 <feMerge>
                   <feMergeNode in="b" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+
+              {/* cloud depth filter (shadow + slight blur) for 3D effect */}
+              <filter id="cloudDepth" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur stdDeviation="6" result="blurSmall" />
+                <feOffset in="blurSmall" dx="0" dy="8" result="shadowOffset" />
+                <feGaussianBlur in="shadowOffset" stdDeviation="6" result="shadowBlur" />
+                <feMerge>
+                  <feMergeNode in="shadowBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
 
-            {/* glow group (applies mask so only halo around visible crescent shows) */}
-            <g style={{ filter: 'url(#moonGlow2)' }}>
-              <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
+            {/* tight halo around visible crescent */}
+            <g style={{ filter: 'url(#moonGlowTight)' }}>
+              <circle cx="60" cy="60" r="40" fill="url(#moonG)" mask="url(#crescentMask)" />
             </g>
 
-            {/* pulsing halo (subtle, behind moon) */}
+            {/* pulsing halo (subtle) */}
             <motion.circle
               cx="60"
               cy="60"
-              r="48"
+              r="46"
               fill="rgba(240,220,120,0.06)"
-              animate={{ opacity: [0.04, 0.12, 0.04], scale: [1, 1.03, 1] }}
+              animate={{ opacity: [0.06, 0.14, 0.06], scale: [1, 1.03, 1] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             />
 
-            {/* moon body with crescent mask applied */}
-            <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
+            {/* moon body */}
+            <circle cx="60" cy="60" r="40" fill="url(#moonG)" mask="url(#crescentMask)" />
 
-            {/* subtle highlight arc for crescent depth */}
-            <path
-              d="M92 60 A32 32 0 0 1 52 92"
-              fill="none"
-              stroke="rgba(255,255,255,0.18)"
-              strokeWidth="1.2"
-              opacity="0.22"
-            />
-
-            {/* small craters */}
-            <circle cx="46" cy="62" r="4.2" fill="rgba(0,0,0,0.06)" opacity="0.95" />
-            <circle cx="74" cy="78" r="3.2" fill="rgba(0,0,0,0.05)" opacity="0.95" />
-            <circle cx="86" cy="54" r="2.8" fill="rgba(0,0,0,0.04)" opacity="0.95" />
+            {/* crater details */}
+            <circle cx="46" cy="62" r="3.8" fill="rgba(0,0,0,0.06)" opacity="0.95" />
+            <circle cx="74" cy="78" r="2.8" fill="rgba(0,0,0,0.05)" opacity="0.95" />
+            <circle cx="86" cy="54" r="2.2" fill="rgba(0,0,0,0.04)" opacity="0.95" />
           </motion.svg>
 
-          {/* drifting cloud clusters (large, soft) */}
-          <motion.div
-            aria-hidden="true"
-            initial={{ opacity: 0.0 }}
-            animate={{ opacity: [0.0, 0.18, 0.0] }}
-            transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-0 -z-19"
-            style={{ pointerEvents: 'none' }}
-          >
-            <svg viewBox="0 0 1600 900" className="w-full h-full" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <filter id="cloudBlurFull" x="-60%" y="-60%" width="260%" height="260%">
-                  <feGaussianBlur stdDeviation="24" />
-                </filter>
-              </defs>
-
-              <g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)">
-                <motion.ellipse
-                  cx="300"
-                  cy="200"
-                  rx="420"
-                  ry="160"
-                  animate={{ x: [0, -40, 0] }}
-                  transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
-                />
-                <motion.ellipse
-                  cx="900"
-                  cy="320"
-                  rx="520"
-                  ry="200"
-                  animate={{ x: [0, 40, 0] }}
-                  transition={{ duration: 48, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
-                />
-                <motion.ellipse
-                  cx="1300"
-                  cy="180"
-                  rx="360"
-                  ry="140"
-                  animate={{ x: [0, -30, 0] }}
-                  transition={{ duration: 42, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-                />
-                <motion.ellipse
-                  cx="700"
-                  cy="520"
-                  rx="640"
-                  ry="220"
-                  animate={{ x: [0, 30, 0] }}
-                  transition={{ duration: 56, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
-                />
-              </g>
-            </svg>
-          </motion.div>
-
-          {/* stars + layered cloud detail */}
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 1200 700"
-            preserveAspectRatio="xMidYMid slice"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            style={{ zIndex: -20 }}
-          >
+          {/* multi-layer smoke clouds for depth (3 layers: far, mid, near) */}
+          <svg className="w-full h-full absolute inset-0" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style={{ zIndex: -11 }}>
             <defs>
-              <filter id="cloudBlur2" x="-60%" y="-60%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="10" />
-              </filter>
+              {/* smoke gradients */}
+              <linearGradient id="smokeFar" x1="0" x2="1">
+                <stop offset="0%" stopColor="rgba(140,140,145,0.10)" />
+                <stop offset="100%" stopColor="rgba(120,120,125,0.06)" />
+              </linearGradient>
+              <linearGradient id="smokeMid" x1="0" x2="1">
+                <stop offset="0%" stopColor="rgba(110,110,115,0.16)" />
+                <stop offset="100%" stopColor="rgba(90,90,95,0.10)" />
+              </linearGradient>
+              <linearGradient id="smokeNear" x1="0" x2="1">
+                <stop offset="0%" stopColor="rgba(90,90,95,0.22)" />
+                <stop offset="100%" stopColor="rgba(70,70,75,0.14)" />
+              </linearGradient>
+            </defs>
 
+            {/* Far layer: larger, lighter, more blur (gives atmospheric depth) */}
+            <motion.g filter="url(#cloudDepth)" opacity="0.70" animate={{ x: [0, -18, 0] }} transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}>
+              <g transform="translate(260,140)" opacity="0.78">
+                <ellipse cx="0" cy="0" rx="520" ry="160" fill="url(#smokeFar)" />
+                <ellipse cx="-160" cy="20" rx="420" ry="120" fill="url(#smokeFar)" />
+                <ellipse cx="360" cy="50" rx="380" ry="120" fill="url(#smokeFar)" />
+              </g>
+            </motion.g>
+
+            {/* Mid layer: medium contrast and blur */}
+            <motion.g filter="url(#cloudDepth)" opacity="0.85" animate={{ x: [0, -26, 0] }} transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}>
+              <g transform="translate(520,220)" opacity="0.9">
+                <ellipse cx="0" cy="0" rx="420" ry="140" fill="url(#smokeMid)" />
+                <ellipse cx="-120" cy="14" rx="340" ry="110" fill="url(#smokeMid)" />
+                <ellipse cx="220" cy="30" rx="300" ry="100" fill="url(#smokeMid)" />
+              </g>
+            </motion.g>
+
+            {/* Near layer: darker, less blur, casts subtle shadow to appear 'closer' */}
+            <motion.g filter="url(#cloudDepth)" opacity="0.95" animate={{ x: [0, -36, 0] }} transition={{ duration: 44, repeat: Infinity, ease: 'easeInOut' }}>
+              <g transform="translate(760,320)" opacity="0.98">
+                <ellipse cx="0" cy="0" rx="340" ry="110" fill="url(#smokeNear)" />
+                <ellipse cx="-90" cy="10" rx="260" ry="90" fill="url(#smokeNear)" />
+                <ellipse cx="160" cy="22" rx="220" ry="80" fill="url(#smokeNear)" />
+              </g>
+            </motion.g>
+          </svg>
+
+          {/* stars layer */}
+          <svg className="w-full h-full absolute inset-0" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ zIndex: -12 }}>
+            <defs>
               <linearGradient id="starGrad2" x1="0" x2="1">
                 <stop offset="0%" stopColor="#fff9d9" />
                 <stop offset="100%" stopColor="#ffe77a" />
               </linearGradient>
             </defs>
 
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, -30, 0] }}
-              transition={{ duration: 26, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.85"
-            >
-              <g transform="translate(120,100)" fill="rgba(100,100,108,0.54)">
-                <ellipse cx="0" cy="0" rx="76" ry="30" />
-                <ellipse cx="-54" cy="12" rx="64" ry="26" />
-                <ellipse cx="84" cy="16" rx="58" ry="24" />
-              </g>
-            </motion.g>
-
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, -18, 0] }}
-              transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.62"
-            >
-              <g transform="translate(260,160)" fill="rgba(100,100,108,0.42)">
-                <ellipse cx="0" cy="0" rx="140" ry="44" />
-                <ellipse cx="-80" cy="12" rx="96" ry="34" />
-                <ellipse cx="92" cy="10" rx="78" ry="30" />
-              </g>
-            </motion.g>
-
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, 20, 0] }}
-              transition={{ duration: 28, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.48"
-            >
-              <g transform="translate(920,110)" fill="rgba(100,100,108,0.36)">
-                <ellipse cx="0" cy="0" rx="84" ry="28" />
-                <ellipse cx="-46" cy="8" rx="64" ry="20" />
-                <ellipse cx="58" cy="10" rx="52" ry="18" />
-              </g>
-            </motion.g>
-
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, -12, 0] }}
-              transition={{ duration: 30, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.34"
-            >
-              <g transform="translate(520,220)" fill="rgba(100,100,108,0.28)">
-                <ellipse cx="0" cy="0" rx="150" ry="36" />
-                <ellipse cx="-110" cy="10" rx="120" ry="32" />
-                <ellipse cx="110" cy="12" rx="96" ry="28" />
-              </g>
-            </motion.g>
-
-            {/* star field */}
             {stars.map((s, idx) => {
               const cx = (s.x / 100) * 1200;
               const cy = (s.y / 100) * 700;
@@ -338,12 +262,6 @@ const Hero = () => {
                   transition={{ duration: 1.4 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
                 >
                   <circle cx={cx + jitterX} cy={cy + jitterY} r={s.r * 0.9} fill="url(#starGrad2)" opacity={0.95} />
-                  {s.r > 1.15 && (
-                    <g transform={`translate(${cx + jitterX}, ${cy + jitterY})`}>
-                      <line x1={-s.r * 0.9} y1={0} x2={s.r * 0.9} y2={0} stroke="#fff7b6" strokeWidth={0.55} strokeLinecap="round" />
-                      <line x1={0} y1={-s.r * 0.9} x2={0} y2={s.r * 0.9} stroke="#fff7b6" strokeWidth={0.55} strokeLinecap="round" />
-                    </g>
-                  )}
                 </motion.g>
               );
             })}
