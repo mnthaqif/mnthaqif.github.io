@@ -206,16 +206,16 @@ const Hero = () => {
 
               {/* stronger glow filter for moon (added per request) */}
               <filter id="moonStrongGlow" x="-200%" y="-200%" width="500%" height="500%">
-                <!-- Blur to create soft halo -->
+                {/* Blur to create soft halo */}
                 <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-                <!-- Boost brightness of blurred area -->
+                {/* Boost brightness of blurred area */}
                 <feColorMatrix in="blur" type="matrix"
                   values="
                     1 0 0 0 0.08
                     0 1 0 0 0.06
                     0 0 1 0 0.00
                     0 0 0 1 0" result="bright"/>
-                <!-- merge the bright halo with original -->
+                {/* merge the bright halo with original */}
                 <feMerge>
                   <feMergeNode in="bright"/>
                   <feMergeNode in="SourceGraphic"/>
