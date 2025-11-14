@@ -1,7 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
+
+/**
+ * Small typing component (no extra deps)
+ */
+function Typing({ text, speed = 80, className = '' }) {
+  const [display, setDisplay] = useState('');
+  useEffect(() => {
+    let i = 0;
+    setDisplay('');
+    const id = setInterval(() => {
+      i += 1;
+      setDisplay(text.slice(0, i));
+      if (i >= text.length) clearInterval(id);
+    }, speed);
+    return () => clearInterval(id);
+  }, [text, speed]);
+
+  return (
+    <span className={className}>
+      {display}
+      <span
+        className="inline-block ml-1 w-[8px] h-6 align-middle bg-slate-800 dark:bg-slate-200 animate-pulse"
+        aria-hidden="true"
+      />
+    </span>
+  );
+}
 
 const containerVariants = {
   hidden: { opacity: 0, y: 10 },
@@ -22,16 +49,17 @@ const Hero = () => {
 
   return (
     <section
-      className="min-h-screen flex items-center justify-center section-padding"
-      style={{
-        minHeight: '54vh',
-        // soft light blue base + very subtle gradient overlay
-        background:
-          'linear-gradient(180deg, rgba(219,234,254,0.10) 0%, rgba(235,248,255,0.10) 100%), #eaf9ff',
-      }}
       aria-label="Hero"
+      className="relative flex items-center justify-center overflow-hidden"
+      style={{
+        // full screen hero
+        height: '100vh',
+        // soft light blue base with slightly stronger gradient so it's visible around the avatar
+        background:
+          'radial-gradient(circle at 50% 40%, rgba(59,130,246,0.12) 0%, rgba(6,182,212,0.04) 25%, transparent 60%), linear-gradient(180deg, #c8eeff 0%, #eaf9ff 50%, #ffffff 100%)',
+      }}
     >
-      {/* animated soft background shapes */}
+      {/* subtle animated blurred background shapes (soft, low-contrast) */}
       <svg
         className="absolute inset-0 w-full h-full -z-10"
         viewBox="0 0 1200 700"
@@ -45,26 +73,26 @@ const Hero = () => {
           </filter>
         </defs>
 
-        {/* left float */}
+        {/* left blob - gentle float */}
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ x: [0, -20, 0], opacity: [0.22, 0.28, 0.22] }}
+          animate={{ x: [0, -18, 0], opacity: [0.20, 0.26, 0.20] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="180" cy="220" rx="300" ry="160" fill="#c7e7ff" opacity="0.22" />
+          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" opacity="0.20" />
         </motion.g>
 
-        {/* right float */}
+        {/* right blob - gentle float */}
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ y: [0, -16, 0], opacity: [0.16, 0.2, 0.16] }}
+          animate={{ y: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="980" cy="260" rx="320" ry="180" fill="#dfffe8" opacity="0.16" />
+          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" opacity="0.16" />
         </motion.g>
 
-        {/* faint radial wash for center focus */}
-        <rect width="100%" height="100%" fill="rgba(255,255,255,0.04)" />
+        {/* centered subtle radial highlight to make gradient visible near avatar */}
+        <ellipse cx="600" cy="260" rx="260" ry="160" fill="#d2f4ff" opacity="0.10" />
       </svg>
 
       <div className="max-w-4xl mx-auto text-center w-full px-4">
@@ -78,64 +106,50 @@ const Hero = () => {
             variants={childVariant}
             src={avatar}
             alt={personal.name}
-            className="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto mb-6 shadow-lg border-4 border-white/60"
+            className="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto mb-6 shadow-xl border-4 border-white/70"
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: [0.98, 1.02, 0.98], y: [0, -6, 0] }}
+            animate={{ opacity: 1, scale: [0.98, 1.02, 0.98], y: [0, -8, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             whileHover={{ scale: 1.06 }}
           />
 
           <motion.h1
             variants={childVariant}
-            className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-3 bg-clip-text text-transparent"
-            style={{
-              backgroundImage:
-                'linear-gradient(90deg, rgba(6,182,212,0.95), rgba(59,130,246,0.95))',
-              backgroundSize: '200% 200%',
-            }}
-            animate={{ backgroundPosition: ['0% 50%', '100% 50%'] }}
-            transition={{ duration: 8, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
+            className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2"
           >
-            {personal.name}
+            {/* typing animation for your name */}
+            <Typing text={personal.name} speed={80} className="bg-clip-text text-transparent" />
           </motion.h1>
 
-          <motion.p
-            variants={childVariant}
-            className="text-xl md:text-2xl text-slate-700 mb-4"
-          >
+          <motion.p variants={childVariant} className="text-xl md:text-2xl text-slate-700 mb-3">
             {personal.title}
           </motion.p>
 
-          <motion.p
-            variants={childVariant}
-            className="text-lg text-slate-600 mb-4"
-          >
+          <motion.p variants={childVariant} className="text-lg text-slate-600 mb-4">
             {personal.location}
           </motion.p>
 
-          {/* Simple about me (added) */}
-          <motion.p
-            variants={childVariant}
-            className="max-w-2xl mx-auto text-slate-600 mb-6 text-base"
-          >
-            I build web applications with JavaScript and React. I enjoy solving practical problems
-            and learning new tools to improve my work.
+          {/* Simple about me */}
+          <motion.p variants={childVariant} className="max-w-2xl mx-auto text-slate-600 mb-6 text-base">
+            I build web applications with JavaScript and React. I enjoy solving practical problems and
+            improving my skills with new tools.
           </motion.p>
 
-          <motion.div
-            variants={childVariant}
-            className="flex justify-center gap-4 flex-wrap"
-          >
+          <motion.div variants={childVariant} className="flex justify-center gap-4 flex-wrap">
             <motion.a
               href={personal.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-white/80 hover:bg-primary-100 transition-colors shadow-sm"
+              className="p-3 rounded-full bg-white/90 hover:bg-primary-100 transition-colors shadow-sm"
               aria-label="GitHub"
               whileHover={{ scale: 1.06 }}
             >
               <svg className="w-6 h-6 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"
+                  clipRule="evenodd"
+                />
               </svg>
             </motion.a>
 
@@ -143,7 +157,7 @@ const Hero = () => {
               href={personal.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-white/80 hover:bg-primary-100 transition-colors shadow-sm"
+              className="p-3 rounded-full bg-white/90 hover:bg-primary-100 transition-colors shadow-sm"
               aria-label="LinkedIn"
               whileHover={{ scale: 1.06 }}
             >
@@ -154,7 +168,7 @@ const Hero = () => {
 
             <motion.a
               href={`mailto:${personal.email}`}
-              className="p-3 rounded-full bg-white/80 hover:bg-primary-100 transition-colors shadow-sm"
+              className="p-3 rounded-full bg-white/90 hover:bg-primary-100 transition-colors shadow-sm"
               aria-label="Email"
               whileHover={{ scale: 1.06 }}
             >
