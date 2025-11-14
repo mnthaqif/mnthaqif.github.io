@@ -157,9 +157,7 @@ const Hero = () => {
             </filter>
           </defs>
 
-          {/* A few large, soft cloud shapes across the whole page.
-              Opacity uses Tailwind-style comments but set inline so both light/dark show.
-              Not dense: 4 large shapes + a few small wisps. */}
+          {/* A few large, soft cloud shapes across the whole page */}
           <g filter="url(#cloudBlurShared)" fill="rgba(255,255,255,0.10)">
             <motion.ellipse
               cx="320"
@@ -237,14 +235,16 @@ const Hero = () => {
                 <stop offset="100%" stopColor="#f0d87f" stopOpacity="1" />
               </radialGradient>
 
-              <mask id="phaseMask">
+              {/* crescent mask: a larger black circle offset a bit to create a persistent crescent shape.
+                  the mask gently moves but stays within a narrow range so moon remains crescent-like */}
+              <mask id="crescentMask">
                 <rect x="0" y="0" width="120" height="120" fill="white" />
                 <motion.circle
-                  cx="72"
+                  cx="82"
                   cy="60"
                   r="36"
                   fill="black"
-                  animate={{ cx: [90, 72, 48, 72, 90] }}
+                  animate={{ cx: [86, 82, 78, 82, 86] }} // small movement but always creates crescent
                   transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
                 />
               </mask>
@@ -263,7 +263,7 @@ const Hero = () => {
             </defs>
 
             <g style={{ filter: 'url(#moonGlow2)' }}>
-              <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
+              <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#crescentMask)" />
             </g>
 
             <circle cx="46" cy="62" r="4.2" fill="rgba(0,0,0,0.06)" opacity="0.95" />
