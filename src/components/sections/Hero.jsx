@@ -211,7 +211,7 @@ const Hero = () => {
                 </filter>
               </defs>
 
-              <g filter="url(#cloudBlurFull)" fill="rgba(5,8,14,0.28)">
+              <g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)">
                 <motion.ellipse
                   cx="300"
                   cy="200"
@@ -275,7 +275,7 @@ const Hero = () => {
               transition={{ duration: 26, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
               opacity="0.85"
             >
-              <g transform="translate(120,100)" fill="rgba(6,10,20,0.54)">
+              <g transform="translate(120,100)" fill="rgba(100,100,108,0.54)">
                 <ellipse cx="0" cy="0" rx="76" ry="30" />
                 <ellipse cx="-54" cy="12" rx="64" ry="26" />
                 <ellipse cx="84" cy="16" rx="58" ry="24" />
@@ -289,7 +289,7 @@ const Hero = () => {
               transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
               opacity="0.62"
             >
-              <g transform="translate(260,160)" fill="rgba(6,10,20,0.42)">
+              <g transform="translate(260,160)" fill="rgba(100,100,108,0.42)">
                 <ellipse cx="0" cy="0" rx="140" ry="44" />
                 <ellipse cx="-80" cy="12" rx="96" ry="34" />
                 <ellipse cx="92" cy="10" rx="78" ry="30" />
@@ -303,7 +303,7 @@ const Hero = () => {
               transition={{ duration: 28, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
               opacity="0.48"
             >
-              <g transform="translate(920,110)" fill="rgba(6,10,20,0.36)">
+              <g transform="translate(920,110)" fill="rgba(100,100,108,0.36)">
                 <ellipse cx="0" cy="0" rx="84" ry="28" />
                 <ellipse cx="-46" cy="8" rx="64" ry="20" />
                 <ellipse cx="58" cy="10" rx="52" ry="18" />
@@ -317,7 +317,7 @@ const Hero = () => {
               transition={{ duration: 30, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
               opacity="0.34"
             >
-              <g transform="translate(520,220)" fill="rgba(6,10,20,0.28)">
+              <g transform="translate(520,220)" fill="rgba(100,100,108,0.28)">
                 <ellipse cx="0" cy="0" rx="150" ry="36" />
                 <ellipse cx="-110" cy="10" rx="120" ry="32" />
                 <ellipse cx="110" cy="12" rx="96" ry="28" />
