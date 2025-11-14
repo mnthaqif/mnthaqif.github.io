@@ -25,7 +25,7 @@ function Typing({ text, speed = 80, className = '' }) {
         // thin caret using currentColor so it follows the text color
         style={{
           display: 'inline-block',
-          width: '0.12ch', // thin
+          width: '0.12ch',
           height: '1em',
           borderRadius: '1px',
           backgroundColor: 'currentColor',
@@ -57,19 +57,16 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
       style={{ height: '100vh' }}
     >
-      {/* Vertical gradient adapts to dark mode: light-blue in light, gentle slate in dark */}
+      {/* Vertical gradient: uses Tailwind dark: classes so it changes with dark-mode toggle */}
       <div
-        className="absolute inset-0 -z-20 transition-colors duration-300
-                   bg-gradient-to-b from-sky-300 via-sky-150 to-white
-                   dark:from-slate-900 dark:via-slate-800 dark:to-slate-800"
-        style={{
-          // fallback that closely matches Tailwind colors if custom shades are missing
-          background:
-            'linear-gradient(180deg, rgba(152,216,255,1) 0%, rgba(233,246,255,1) 50%, rgba(255,255,255,1) 100%)',
-        }}
+        className={
+          'absolute inset-0 -z-20 transition-colors duration-300 ' +
+          'bg-gradient-to-b from-sky-300 via-sky-100 to-white ' +
+          'dark:from-slate-900 dark:via-slate-800 dark:to-slate-700'
+        }
       />
 
-      {/* subtle blurred background blobs only (no centered oval) */}
+      {/* subtle blurred background blobs (no centered oval); opacities adapt in dark mode */}
       <svg
         className="absolute inset-0 w-full h-full -z-10 pointer-events-none"
         viewBox="0 0 1200 700"
@@ -88,7 +85,7 @@ const Hero = () => {
           animate={{ x: [0, -16, 0], opacity: [0.16, 0.22, 0.16] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" className="opacity-20 dark:opacity-8" />
+          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" className="opacity-20 dark:opacity-5" />
         </motion.g>
 
         <motion.g
@@ -96,7 +93,7 @@ const Hero = () => {
           animate={{ y: [0, -12, 0], opacity: [0.12, 0.16, 0.12] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" className="opacity-16 dark:opacity-6" />
+          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" className="opacity-16 dark:opacity-5" />
         </motion.g>
       </svg>
 
@@ -104,7 +101,6 @@ const Hero = () => {
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mx-auto">
           {/* Avatar with animated wave rings */}
           <div className="relative inline-block mx-auto mb-6">
-            {/* ring 1 */}
             <motion.span
               aria-hidden="true"
               className="absolute rounded-full"
@@ -118,7 +114,6 @@ const Hero = () => {
               animate={{ scale: [1, 1.9], opacity: [0.26, 0] }}
               transition={{ duration: 2.8, repeat: Infinity, ease: 'easeOut' }}
             />
-            {/* ring 2 delayed */}
             <motion.span
               aria-hidden="true"
               className="absolute rounded-full"
@@ -133,8 +128,6 @@ const Hero = () => {
               transition={{ duration: 3.6, repeat: Infinity, ease: 'easeOut', delay: 0.6 }}
             />
 
-            {/* High-resolution rendering hints and sizing to reduce blur.
-                For best result replace src/assets/thaqif.jpg with a higher-res image (2x/3x). */}
             <motion.img
               variants={itemVariant}
               custom={0}
@@ -153,7 +146,7 @@ const Hero = () => {
             />
           </div>
 
-          {/* Name: blue in light mode, white in dark mode; thin blinking caret included */}
+          {/* Name: blue in light mode, white in dark mode; thin blinking caret */}
           <motion.h1 variants={itemVariant} custom={0.1} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
             <Typing text={personal.name} speed={70} className="text-sky-700 dark:text-white" />
           </motion.h1>
