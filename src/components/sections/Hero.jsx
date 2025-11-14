@@ -71,13 +71,15 @@ const Hero = () => {
     { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
-  // shooting stars: each has start percent x/y, angle (deg), length (px), duration and delay
+  // shooting stars: start percent x/y, angle (deg), length (px), duration and delay
   const shootingStars = [
-    { sx: 10, sy: 6, angle: 22, len: 260, duration: 1.1, delay: 2.4 },
-    { sx: 25, sy: 12, angle: 18, len: 300, duration: 1.2, delay: 6.0 },
-    { sx: 62, sy: 8, angle: 25, len: 320, duration: 1.0, delay: 11.0 },
-    { sx: 80, sy: 16, angle: 20, len: 280, duration: 1.3, delay: 18.0 },
-    { sx: 40, sy: 4, angle: 16, len: 240, duration: 0.95, delay: 24.0 },
+    { sx: 8, sy: 6, angle: 22, len: 420, duration: 1.05, delay: 2.4 },
+    { sx: 30, sy: 10, angle: 20, len: 480, duration: 1.25, delay: 6.0 },
+    { sx: 52, sy: 7, angle: 24, len: 520, duration: 1.0, delay: 11.0 },
+    { sx: 78, sy: 15, angle: 18, len: 460, duration: 1.3, delay: 18.0 },
+    { sx: 42, sy: 3, angle: 16, len: 400, duration: 0.95, delay: 24.0 },
+    // a couple of rarer slow long ones
+    { sx: 12, sy: 20, angle: 26, len: 680, duration: 1.6, delay: 28.0 },
   ];
 
   return (
@@ -170,12 +172,22 @@ const Hero = () => {
                 </feMerge>
               </filter>
 
-              {/* shooting star gradient */}
+              {/* shooting star gradient + glow */}
               <linearGradient id="shootGrad" x1="0" x2="1" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-                <stop offset="70%" stopColor="#ffd98a" stopOpacity="0.95" />
+                <stop offset="40%" stopColor="#fff8da" stopOpacity="0.9" />
+                <stop offset="90%" stopColor="#ffd98a" stopOpacity="0.6" />
                 <stop offset="100%" stopColor="#ffd98a" stopOpacity="0" />
               </linearGradient>
+
+              <filter id="shootGlow" x="-200%" y="-200%" width="500%" height="500%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="gblur" />
+                <feColorMatrix in="gblur" type="matrix" values="1 0 0 0 0.14  0 1 0 0 0.10  0 0 1 0 0  0 0 0 1 0" result="gbright" />
+                <feMerge>
+                  <feMergeNode in="gbright" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
 
             {/* glow group (applies mask so only halo around visible crescent shows) */}
@@ -352,64 +364,72 @@ const Hero = () => {
               );
             })}
 
-            {/* shooting stars (appear occasionally, animated across the sky) */}
+            {/* enhanced shooting stars */}
             {shootingStars.map((st, i) => {
-              // Convert percent start to viewbox coordinates
               const startX = (st.sx / 100) * 1200;
               const startY = (st.sy / 100) * 700;
-              // compute end offsets using angle and length
               const rad = (st.angle * Math.PI) / 180;
               const dx = Math.cos(rad) * st.len;
               const dy = Math.sin(rad) * st.len;
-              // We'll animate the star by moving a short bright line across dx/dy with fade
+              // trail coords relative to group (trail behind head)
+              const trailX = -dx * 0.6;
+              const trailY = -dy * 0.6;
+              const trailLen = Math.hypot(trailX, trailY) || 1;
+
               return (
                 <motion.g
                   key={`shoot-${i}`}
+                  // group starts at (startX,startY) and moves by (dx,dy)
+                  transform={`translate(${startX}, ${startY})`}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 1, 0] }}
+                  animate={{ x: [0, dx], y: [0, dy], opacity: [0, 1, 0] }}
                   transition={{
-                    repeat: Infinity,
+                    duration: st.duration,
                     delay: st.delay,
-                    duration: st.duration + 0.2,
                     ease: 'easeOut',
-                    repeatDelay: 8 + i * 3,
+                    repeat: Infinity,
+                    repeatDelay: 8 + i * 4,
                   }}
                 >
-                  {/* trail - a stroked path that moves from start to end */}
+                  {/* trailing streak (tapered): a line from trail start -> head */}
                   <motion.line
-                    x1={startX}
-                    y1={startY}
-                    x2={startX + dx * 0.12}
-                    y2={startY + dy * 0.12}
+                    x1={trailX}
+                    y1={trailY}
+                    x2={0}
+                    y2={0}
                     stroke="url(#shootGrad)"
-                    strokeWidth={2.2}
+                    strokeWidth={2.6}
                     strokeLinecap="round"
-                    initial={{ x: 0, y: 0, opacity: 0 }}
-                    animate={{ x: [0, dx], y: [0, dy], opacity: [0.0, 1, 0.0] }}
+                    strokeLinejoin="round"
+                    strokeDasharray={trailLen}
+                    strokeDashoffset={trailLen}
+                    style={{ filter: 'url(#shootGlow)' }}
+                    animate={{ strokeDashoffset: [trailLen, 0], opacity: [0, 1, 0] }}
                     transition={{
                       duration: st.duration,
                       delay: st.delay,
                       ease: 'easeOut',
                       repeat: Infinity,
-                      repeatDelay: 10 + i * 4,
+                      repeatDelay: 8 + i * 4,
                     }}
                   />
-                  {/* head - a small bright circle that travels with the line */}
+
+                  {/* head - bright glowing dot */}
                   <motion.circle
-                    r={1.8}
+                    cx={0}
+                    cy={0}
+                    r={2.8}
                     fill="#fff"
-                    cx={startX}
-                    cy={startY}
-                    initial={{ x: 0, y: 0, opacity: 0 }}
-                    animate={{ x: [0, dx], y: [0, dy], opacity: [0, 1, 0] }}
+                    style={{ filter: 'url(#shootGlow)' }}
+                    initial={{ opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: [0, 1, 0], scale: [0.6, 1.0, 0.8] }}
                     transition={{
                       duration: st.duration,
                       delay: st.delay,
                       ease: 'easeOut',
                       repeat: Infinity,
-                      repeatDelay: 10 + i * 4,
+                      repeatDelay: 8 + i * 4,
                     }}
-                    style={{ filter: 'drop-shadow(0 0 6px rgba(255,220,120,0.85))' }}
                   />
                 </motion.g>
               );
