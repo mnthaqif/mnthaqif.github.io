@@ -40,7 +40,7 @@ export const resumeData = {
     "NestJS",
     "Express.js",
     "REST APIs",
-    ".NET (ODBC Integration)"
+    ".NET"
     ],
     databases: ["MySQL", "Sequelize ORM"],
     devops: ["CI/CD", "GitHub Actions"],
