@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
 
-/** Typing with blinking caret sized to the name */
+/** Typing with thin blinking caret sized to the name */
 function Typing({ text, speed = 80, className = '' }) {
   const [display, setDisplay] = useState('');
   useEffect(() => {
@@ -18,16 +18,16 @@ function Typing({ text, speed = 80, className = '' }) {
   }, [text, speed]);
 
   return (
-    <span className={className} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+    <span className={className} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
       <span>{display}</span>
       <motion.span
         aria-hidden="true"
-        // caret sized to the font by using em-based sizing so it matches the name
+        // thin caret using currentColor so it follows the text color
         style={{
           display: 'inline-block',
-          width: '0.45ch',
+          width: '0.12ch', // thin
           height: '1em',
-          borderRadius: '2px',
+          borderRadius: '1px',
           backgroundColor: 'currentColor',
           verticalAlign: 'middle',
         }}
@@ -55,23 +55,21 @@ const Hero = () => {
     <section
       aria-label="Hero"
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
-      style={{ height: '100vh' }} // full screen
+      style={{ height: '100vh' }}
     >
-      {/* vertical light-blue gradient in light mode, darker gentle gradient in dark mode (tailwind dark: variants) */}
+      {/* Vertical gradient adapts to dark mode: light-blue in light, gentle slate in dark */}
       <div
-        className={
-          'absolute inset-0 -z-20 transition-colors duration-300 ' +
-          'bg-gradient-to-b from-sky-300 via-sky-150 to-white ' +
-          'dark:from-slate-800 dark:via-slate-900 dark:to-slate-850'
-        }
-        // fallback inline style so colors show even if Tailwind custom shades are missing
+        className="absolute inset-0 -z-20 transition-colors duration-300
+                   bg-gradient-to-b from-sky-300 via-sky-150 to-white
+                   dark:from-slate-900 dark:via-slate-800 dark:to-slate-800"
         style={{
+          // fallback that closely matches Tailwind colors if custom shades are missing
           background:
             'linear-gradient(180deg, rgba(152,216,255,1) 0%, rgba(233,246,255,1) 50%, rgba(255,255,255,1) 100%)',
         }}
       />
 
-      {/* subtle blurred background blobs only, no centered oval */}
+      {/* subtle blurred background blobs only (no centered oval) */}
       <svg
         className="absolute inset-0 w-full h-full -z-10 pointer-events-none"
         viewBox="0 0 1200 700"
@@ -87,18 +85,18 @@ const Hero = () => {
 
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ x: [0, -16, 0], opacity: [0.18, 0.24, 0.18] }}
+          animate={{ x: [0, -16, 0], opacity: [0.16, 0.22, 0.16] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" opacity="0.18" />
+          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" className="opacity-20 dark:opacity-8" />
         </motion.g>
 
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ y: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
+          animate={{ y: [0, -12, 0], opacity: [0.12, 0.16, 0.12] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" opacity="0.14" />
+          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" className="opacity-16 dark:opacity-6" />
         </motion.g>
       </svg>
 
@@ -114,10 +112,10 @@ const Hero = () => {
                 inset: 0,
                 borderRadius: '9999px',
                 boxSizing: 'border-box',
-                border: '2px solid rgba(59,130,246,0.16)',
+                border: '2px solid rgba(59,130,246,0.14)',
               }}
-              initial={{ scale: 1, opacity: 0.28 }}
-              animate={{ scale: [1, 1.9], opacity: [0.28, 0] }}
+              initial={{ scale: 1, opacity: 0.26 }}
+              animate={{ scale: [1, 1.9], opacity: [0.26, 0] }}
               transition={{ duration: 2.8, repeat: Infinity, ease: 'easeOut' }}
             />
             {/* ring 2 delayed */}
@@ -128,14 +126,15 @@ const Hero = () => {
                 inset: 0,
                 borderRadius: '9999px',
                 boxSizing: 'border-box',
-                border: '2px solid rgba(59,130,246,0.10)',
+                border: '2px solid rgba(59,130,246,0.09)',
               }}
-              initial={{ scale: 1, opacity: 0.18 }}
-              animate={{ scale: [1, 1.6], opacity: [0.18, 0] }}
+              initial={{ scale: 1, opacity: 0.16 }}
+              animate={{ scale: [1, 1.6], opacity: [0.16, 0] }}
               transition={{ duration: 3.6, repeat: Infinity, ease: 'easeOut', delay: 0.6 }}
             />
 
-            {/* High-resolution rendering hints and sizing to reduce blur (replace image with a high-res source if available) */}
+            {/* High-resolution rendering hints and sizing to reduce blur.
+                For best result replace src/assets/thaqif.jpg with a higher-res image (2x/3x). */}
             <motion.img
               variants={itemVariant}
               custom={0}
@@ -154,12 +153,12 @@ const Hero = () => {
             />
           </div>
 
-          {/* Name: blue in light mode, white in dark mode; typing caret sized to match */}
+          {/* Name: blue in light mode, white in dark mode; thin blinking caret included */}
           <motion.h1 variants={itemVariant} custom={0.1} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
             <Typing text={personal.name} speed={70} className="text-sky-700 dark:text-white" />
           </motion.h1>
 
-          {/* Full-Stack Developer: fade-in animation */}
+          {/* Full-Stack Developer: fade-in */}
           <motion.p
             variants={itemVariant}
             custom={0.2}
@@ -181,13 +180,13 @@ const Hero = () => {
             I build web applications with JavaScript and React. I enjoy solving practical problems and improving my skills.
           </motion.p>
 
-          {/* Social icons: circular backgrounds adapt to light/dark, bigger icons, removed email */}
+          {/* Social icons: circular backgrounds adapt to light/dark; icons use brand color; larger */}
           <motion.div variants={itemVariant} custom={0.4} className="flex justify-center gap-6 flex-wrap">
             <motion.a
               href={personal.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3.5 md:p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
+              className="p-3.5 md:p-4 rounded-full bg-white border border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700 flex items-center justify-center"
               aria-label="GitHub"
               whileHover={{ scale: 1.06, y: -3 }}
             >
@@ -200,7 +199,7 @@ const Hero = () => {
               href={personal.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3.5 md:p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
+              className="p-3.5 md:p-4 rounded-full bg-white border border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700 flex items-center justify-center"
               aria-label="LinkedIn"
               whileHover={{ scale: 1.06, y: -3 }}
             >
