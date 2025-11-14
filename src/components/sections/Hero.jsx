@@ -50,7 +50,7 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // star positions (kept balanced)
+  // balanced star distribution
   const stars = [
     { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
     { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
@@ -186,7 +186,7 @@ const Hero = () => {
       {/* Dark-sky (moon, layered clouds, stars) - visible only in dark mode */}
       <div className="absolute inset-0 pointer-events-none -z-20">
         <div className="hidden dark:block w-full h-full">
-          {/* Improved SVG moon: crescent mask + clearer animation + glow pulse */}
+          {/* Improved SVG moon: crescent mask + clearer animation + stronger glow pulse */}
           <motion.svg
             aria-hidden="true"
             viewBox="0 0 120 120"
@@ -204,12 +204,21 @@ const Hero = () => {
                 <stop offset="100%" stopColor="#f0d87f" stopOpacity="1" />
               </radialGradient>
 
-              {/* outer glow (pulsing) */}
-              <filter id="moonGlow" x="-120%" y="-120%" width="340%" height="340%">
-                <feGaussianBlur stdDeviation="6" result="g" />
+              {/* stronger glow filter for moon (added per request) */}
+              <filter id="moonStrongGlow" x="-200%" y="-200%" width="500%" height="500%">
+                <!-- Blur to create soft halo -->
+                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+                <!-- Boost brightness of blurred area -->
+                <feColorMatrix in="blur" type="matrix"
+                  values="
+                    1 0 0 0 0.08
+                    0 1 0 0 0.06
+                    0 0 1 0 0.00
+                    0 0 0 1 0" result="bright"/>
+                <!-- merge the bright halo with original -->
                 <feMerge>
-                  <feMergeNode in="g" />
-                  <feMergeNode in="SourceGraphic" />
+                  <feMergeNode in="bright"/>
+                  <feMergeNode in="SourceGraphic"/>
                 </feMerge>
               </filter>
 
@@ -226,21 +235,19 @@ const Hero = () => {
                 />
               </mask>
 
-              {/* subtle highlight overlay to give crescent depth */}
-              <linearGradient id="moonHighlight" x1="0" x2="1">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.46)" />
-                <stop offset="100%" stopColor="rgba(255,255,255,0.06)" />
-              </linearGradient>
+              <filter id="cloudBlur2" x="-60%" y="-60%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="10" />
+              </filter>
             </defs>
 
-            {/* glow behind moon (pulsing) */}
+            {/* pulsing halo (applies stronger glow filter) */}
             <motion.circle
               cx="60"
               cy="60"
               r="46"
-              fill="rgba(240,220,120,0.06)"
-              style={{ filter: 'url(#moonGlow)' }}
-              animate={{ opacity: [0.08, 0.14, 0.08], scale: [1, 1.03, 1] }}
+              fill="rgba(240,220,120,0.08)"
+              style={{ filter: 'url(#moonStrongGlow)' }}
+              animate={{ opacity: [0.06, 0.14, 0.06], scale: [1, 1.04, 1] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             />
 
@@ -251,8 +258,8 @@ const Hero = () => {
             <path
               d="M92 60 A32 32 0 0 1 52 92"
               fill="none"
-              stroke="url(#moonHighlight)"
-              strokeWidth="2"
+              stroke="rgba(255,255,255,0.18)"
+              strokeWidth="1.6"
               opacity="0.22"
             />
 
