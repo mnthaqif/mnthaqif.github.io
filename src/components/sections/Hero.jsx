@@ -50,16 +50,20 @@ const itemVariant = {
 
 const Hero = () => {
   const { personal } = resumeData;
-  const [isDark, setIsDark] = useState(false);
 
-  // Watch for 'dark' class on documentElement so we can render/animate moon & stars only in dark mode.
-  useEffect(() => {
-    const update = () => setIsDark(document.documentElement.classList.contains('dark'));
-    update();
-    const mo = new MutationObserver(() => update());
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => mo.disconnect();
-  }, []);
+  // star positions (percent-based) so they scale with screen size
+  const stars = [
+    { x: 6, y: 10, r: 1.6, d: 0 },
+    { x: 14, y: 18, r: 1.2, d: 0.3 },
+    { x: 22, y: 8, r: 1.1, d: 0.6 },
+    { x: 30, y: 14, r: 1.3, d: 1.0 },
+    { x: 42, y: 6, r: 1.4, d: 0.2 },
+    { x: 58, y: 12, r: 1.2, d: 0.8 },
+    { x: 70, y: 7, r: 1.1, d: 1.1 },
+    { x: 78, y: 18, r: 1.5, d: 0.4 },
+    { x: 86, y: 9, r: 1.2, d: 0.9 },
+    { x: 94, y: 16, r: 1.0, d: 0.5 },
+  ];
 
   return (
     <section
@@ -67,18 +71,19 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
       style={{ height: '100vh' }}
     >
-      {/* Vertical gradient adapts to dark mode */}
+      {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode (Tailwind handles swap) */}
       <div
         className={
-          'absolute inset-0 -z-20 transition-colors duration-300 ' +
-          'bg-gradient-to-b from-sky-300 via-sky-150 to-white ' +
+          'absolute inset-0 -z-30 transition-colors duration-300 ' +
+          'bg-gradient-to-b from-sky-300 via-sky-100 to-white ' +
           'dark:from-slate-900 dark:via-slate-800 dark:to-slate-700'
         }
       />
 
-      {/* subtle blurred background blobs only (no centered oval) */}
+      {/* subtle blurred background blobs (kept very soft) - behind the dark-sky */}
       <svg
-        className="absolute inset-0 w-full h-full -z-10 pointer-events-none"
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ zIndex: -40 }}
         viewBox="0 0 1200 700"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
@@ -92,105 +97,89 @@ const Hero = () => {
 
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ x: [0, -16, 0], opacity: [0.16, 0.22, 0.16] }}
+          animate={{ x: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+          style={{ zIndex: -40 }}
         >
-          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" className="opacity-20 dark:opacity-6" />
+          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" opacity="0.14" />
         </motion.g>
 
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ y: [0, -12, 0], opacity: [0.12, 0.16, 0.12] }}
+          animate={{ y: [0, -8, 0], opacity: [0.10, 0.14, 0.10] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+          style={{ zIndex: -40 }}
         >
-          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" className="opacity-16 dark:opacity-6" />
+          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" opacity="0.10" />
         </motion.g>
       </svg>
 
-      {/* Moon & Stars overlay — render only in dark mode for better performance/clarity */}
-      {isDark && (
-        <div className="absolute inset-0 -z-5 pointer-events-none">
-          <svg
-            className="absolute right-12 top-12 w-56 h-56 md:w-72 md:h-72 opacity-100"
-            viewBox="0 0 200 200"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
+      {/* Dark-sky (moon, cloud, stars) - only visible in dark mode; placed above blobs and behind content */}
+      <div className="hidden dark:block absolute inset-0 pointer-events-none" style={{ zIndex: -20 }}>
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 1200 700"
+          preserveAspectRatio="xMidYMid slice"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <defs>
+            <radialGradient id="moonG" cx="30%" cy="25%">
+              <stop offset="0%" stopColor="#fff9d9" stopOpacity="1" />
+              <stop offset="100%" stopColor="#f6e7a0" stopOpacity="0.95" />
+            </radialGradient>
+            <filter id="moonGlow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="14" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* moon (top-left area) */}
+          <motion.g
+            initial={{ x: -6 }}
+            animate={{ x: [0, 2, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ filter: 'url(#moonGlow)' }}
           >
-            {/* moon (crescent using two circles) */}
-            <g transform="translate(40,30)">
-              <motion.circle
-                cx="40"
-                cy="40"
-                r="36"
-                fill="#f8fafc"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 1] }}
-                transition={{ duration: 0.6 }}
-              />
-              <motion.circle
-                cx="55"
-                cy="36"
-                r="34"
-                fill="#0f172a"
-                initial={{ x: 0 }}
-                animate={{ x: [0, 0.8, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </g>
+            <circle cx="160" cy="120" r="46" fill="url(#moonG)" />
+            <circle cx="175" cy="110" r="6" fill="rgba(0,0,0,0.06)" />
+            <circle cx="140" cy="140" r="4" fill="rgba(0,0,0,0.05)" />
+          </motion.g>
 
-            {/* twinkling stars — multiple small circles with staggered animation */}
-            <g>
-              <motion.circle
-                cx="24"
-                cy="28"
-                r="1.6"
-                fill="#fff"
-                initial={{ opacity: 0.2, scale: 1 }}
-                animate={{ opacity: [0.15, 1, 0.15], scale: [1, 1.4, 1] }}
-                transition={{ duration: 2.2, repeat: Infinity, delay: 0.1 }}
-              />
-              <motion.circle
-                cx="70"
-                cy="12"
-                r="1.2"
-                fill="#fff"
-                initial={{ opacity: 0.15, scale: 1 }}
-                animate={{ opacity: [0.12, 0.9, 0.12], scale: [1, 1.3, 1] }}
-                transition={{ duration: 2.6, repeat: Infinity, delay: 0.5 }}
-              />
-              <motion.circle
-                cx="110"
-                cy="36"
-                r="1.4"
-                fill="#fff"
-                initial={{ opacity: 0.18, scale: 1 }}
-                animate={{ opacity: [0.12, 1, 0.12], scale: [1, 1.35, 1] }}
-                transition={{ duration: 2.1, repeat: Infinity, delay: 0.3 }}
-              />
-              <motion.circle
-                cx="140"
-                cy="18"
-                r="1.1"
-                fill="#fff"
-                initial={{ opacity: 0.12, scale: 1 }}
-                animate={{ opacity: [0.12, 0.85, 0.12], scale: [1, 1.25, 1] }}
-                transition={{ duration: 2.4, repeat: Infinity, delay: 0.8 }}
-              />
-              <motion.circle
-                cx="160"
-                cy="44"
-                r="1.3"
-                fill="#fff"
-                initial={{ opacity: 0.14, scale: 1 }}
-                animate={{ opacity: [0.1, 0.9, 0.1], scale: [1, 1.28, 1] }}
-                transition={{ duration: 2.7, repeat: Infinity, delay: 0.2 }}
-              />
-            </g>
-          </svg>
-        </div>
-      )}
+          {/* moving cloud (subtle, near moon) */}
+          <motion.g
+            initial={{ x: 0 }}
+            animate={{ x: [0, -20, 0] }}
+            transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+            opacity="0.85"
+            fill="#0b1220"
+          >
+            <ellipse cx="230" cy="150" rx="48" ry="20" fill="rgba(10,16,24,0.45)" />
+            <ellipse cx="200" cy="150" rx="34" ry="18" fill="rgba(10,16,24,0.38)" />
+            <ellipse cx="260" cy="155" rx="28" ry="14" fill="rgba(10,16,24,0.35)" />
+            <ellipse cx="220" cy="165" rx="60" ry="18" fill="rgba(10,16,24,0.32)" />
+          </motion.g>
 
-      <div className="max-w-4xl mx-auto text-center w-full px-4">
+          {/* stars - positioned across the top half; they twinkle (opacity) and tiny scale */}
+          {stars.map((s, idx) => (
+            <motion.circle
+              key={idx}
+              cx={`${s.x}%`}
+              cy={`${s.y}%`}
+              r={s.r}
+              fill="#ffe77a"
+              initial={{ opacity: 0.2, scale: 1 }}
+              animate={{ opacity: [0.2, 1, 0.2], scale: [1, 1.15, 1] }}
+              transition={{ duration: 1.8 + (s.d || 0), repeat: Infinity, repeatType: 'loop', delay: s.d }}
+            />
+          ))}
+        </svg>
+      </div>
+
+      <div className="max-w-4xl mx-auto text-center w-full px-4 relative z-10">
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mx-auto">
           {/* Avatar with animated wave rings */}
           <div className="relative inline-block mx-auto mb-6">
