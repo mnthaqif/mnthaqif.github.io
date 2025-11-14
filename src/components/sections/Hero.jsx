@@ -50,51 +50,25 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // balanced star distribution
+  // star positions (kept balanced)
   const stars = [
-    { x: 4, y: 8, r: 1.1, d: 0.1 },
-    { x: 10, y: 18, r: 1.3, d: 0.4 },
-    { x: 18, y: 6, r: 1.0, d: 0.2 },
-    { x: 26, y: 14, r: 1.6, d: 0.7 },
-    { x: 34, y: 4, r: 1.2, d: 0.3 },
-    { x: 42, y: 10, r: 1.0, d: 0.9 },
-    { x: 50, y: 6, r: 1.4, d: 0.6 },
-    { x: 58, y: 12, r: 1.1, d: 0.8 },
-    { x: 66, y: 7, r: 1.0, d: 1.1 },
-    { x: 74, y: 20, r: 1.3, d: 0.5 },
-    { x: 82, y: 9, r: 1.2, d: 0.9 },
-    { x: 90, y: 5, r: 0.9, d: 0.2 },
-
-    { x: 8, y: 26, r: 0.9, d: 1.3 },
-    { x: 20, y: 24, r: 1.0, d: 0.5 },
-    { x: 28, y: 22, r: 1.3, d: 0.3 },
-    { x: 36, y: 28, r: 0.9, d: 1.4 },
-    { x: 46, y: 30, r: 1.2, d: 0.6 },
-    { x: 56, y: 26, r: 1.0, d: 0.8 },
-    { x: 64, y: 32, r: 1.1, d: 1.0 },
-    { x: 72, y: 30, r: 0.8, d: 0.7 },
-    { x: 80, y: 28, r: 1.0, d: 0.9 },
-    { x: 88, y: 26, r: 0.9, d: 0.4 },
-
-    // more scattered stars across whole page (not too dense)
-    { x: 6, y: 40, r: 0.8, d: 1.0 },
-    { x: 16, y: 50, r: 0.7, d: 0.6 },
-    { x: 34, y: 48, r: 0.9, d: 0.9 },
-    { x: 52, y: 44, r: 1.0, d: 0.3 },
-    { x: 70, y: 46, r: 0.8, d: 0.7 },
-    { x: 86, y: 36, r: 0.9, d: 0.5 },
-
-    { x: 12, y: 60, r: 0.6, d: 1.2 },
-    { x: 28, y: 64, r: 0.8, d: 0.8 },
-    { x: 44, y: 62, r: 0.7, d: 0.4 },
-    { x: 60, y: 68, r: 0.6, d: 1.0 },
-    { x: 76, y: 58, r: 0.9, d: 0.2 },
-    { x: 92, y: 52, r: 0.7, d: 0.6 },
-
-    { x: 22, y: 10, r: 0.6, d: 0.2 },
-    { x: 38, y: 14, r: 0.5, d: 0.45 },
-    { x: 54, y: 8, r: 0.5, d: 0.65 },
-    { x: 68, y: 18, r: 0.6, d: 0.95 },
+    { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
+    { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
+    { x: 34, y: 4, r: 1.2, d: 0.3 }, { x: 42, y: 10, r: 1.0, d: 0.9 },
+    { x: 50, y: 6, r: 1.4, d: 0.6 }, { x: 58, y: 12, r: 1.1, d: 0.8 },
+    { x: 66, y: 7, r: 1.0, d: 1.1 }, { x: 74, y: 20, r: 1.3, d: 0.5 },
+    { x: 82, y: 9, r: 1.2, d: 0.9 }, { x: 90, y: 5, r: 0.9, d: 0.2 },
+    { x: 8, y: 26, r: 0.9, d: 1.3 }, { x: 20, y: 24, r: 1.0, d: 0.5 },
+    { x: 28, y: 22, r: 1.3, d: 0.3 }, { x: 36, y: 28, r: 0.9, d: 1.4 },
+    { x: 46, y: 30, r: 1.2, d: 0.6 }, { x: 56, y: 26, r: 1.0, d: 0.8 },
+    { x: 64, y: 32, r: 1.1, d: 1.0 }, { x: 72, y: 30, r: 0.8, d: 0.7 },
+    { x: 80, y: 28, r: 1.0, d: 0.9 }, { x: 88, y: 26, r: 0.9, d: 0.4 },
+    { x: 6, y: 40, r: 0.8, d: 1.0 }, { x: 16, y: 50, r: 0.7, d: 0.6 },
+    { x: 34, y: 48, r: 0.9, d: 0.9 }, { x: 52, y: 44, r: 1.0, d: 0.3 },
+    { x: 70, y: 46, r: 0.8, d: 0.7 }, { x: 86, y: 36, r: 0.9, d: 0.5 },
+    { x: 12, y: 60, r: 0.6, d: 1.2 }, { x: 28, y: 64, r: 0.8, d: 0.8 },
+    { x: 44, y: 62, r: 0.7, d: 0.4 }, { x: 60, y: 68, r: 0.6, d: 1.0 },
+    { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
   return (
@@ -144,12 +118,8 @@ const Hero = () => {
         </motion.g>
       </svg>
 
-      {/* Soft, page-wide cloud overlay visible in both light and dark modes (not dense) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-25 pointer-events-none"
-        style={{ mixBlendMode: 'screen' }}
-      >
+      {/* Shared soft cloud overlay (sparse) */}
+      <div aria-hidden="true" className="absolute inset-0 -z-25 pointer-events-none" style={{ mixBlendMode: 'screen' }}>
         <svg className="w-full h-full" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
           <defs>
             <filter id="cloudBlurShared" x="-60%" y="-60%" width="260%" height="260%">
@@ -157,7 +127,6 @@ const Hero = () => {
             </filter>
           </defs>
 
-          {/* A few large, soft cloud shapes across the whole page */}
           <g filter="url(#cloudBlurShared)" fill="rgba(255,255,255,0.10)">
             <motion.ellipse
               cx="320"
@@ -193,7 +162,6 @@ const Hero = () => {
             />
           </g>
 
-          {/* small wisps for texture */}
           <g filter="url(#cloudBlurShared)" fill="rgba(255,255,255,0.06)">
             <motion.ellipse
               cx="480"
@@ -215,84 +183,114 @@ const Hero = () => {
         </svg>
       </div>
 
-      {/* Dark-sky (moon, denser but still subtle clouds + stars) - visible only in dark mode */}
+      {/* Dark-sky (moon, layered clouds, stars) - visible only in dark mode */}
       <div className="absolute inset-0 pointer-events-none -z-20">
         <div className="hidden dark:block w-full h-full">
-          {/* moon (SVG) */}
+          {/* Improved SVG moon: crescent mask + clearer animation + glow pulse */}
           <motion.svg
             aria-hidden="true"
             viewBox="0 0 120 120"
-            className="absolute left-3 top-3 md:left-20 md:top-8 w-16 h-16 md:w-28 md:h-28"
-            initial={{ x: -2 }}
-            animate={{ x: [0, 3, 0], y: [0, -2, 0], rotate: [0, 0.6, 0] }}
+            className="absolute left-3 top-3 md:left-20 md:top-8 w-18 h-18 md:w-32 md:h-32"
+            initial={{ x: -2, scale: 1 }}
+            animate={{ x: [0, 3, 0], y: [0, -2, 0], rotate: [0, 0.6, 0], scale: [1, 1.02, 1] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
             style={{ zIndex: -18 }}
           >
             <defs>
-              <radialGradient id="moonG2" cx="35%" cy="22%">
+              {/* moon surface gradient */}
+              <radialGradient id="moonG" cx="30%" cy="30%">
                 <stop offset="0%" stopColor="#fffde6" stopOpacity="1" />
                 <stop offset="60%" stopColor="#fff2ab" stopOpacity="1" />
                 <stop offset="100%" stopColor="#f0d87f" stopOpacity="1" />
               </radialGradient>
 
-              {/* crescent mask: a larger black circle offset a bit to create a persistent crescent shape.
-                  the mask gently moves but stays within a narrow range so moon remains crescent-like */}
-              <mask id="crescentMask">
+              {/* outer glow (pulsing) */}
+              <filter id="moonGlow" x="-120%" y="-120%" width="340%" height="340%">
+                <feGaussianBlur stdDeviation="6" result="g" />
+                <feMerge>
+                  <feMergeNode in="g" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              {/* crescent mask: animate small horizontal movement so crescent changes slightly but remains crescent */}
+              <mask id="crescent">
                 <rect x="0" y="0" width="120" height="120" fill="white" />
                 <motion.circle
                   cx="82"
                   cy="60"
                   r="36"
                   fill="black"
-                  animate={{ cx: [86, 82, 78, 82, 86] }} // small movement but always creates crescent
-                  transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+                  animate={{ cx: [88, 82, 76, 82, 88] }}
+                  transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                 />
               </mask>
 
-              <filter id="moonGlow2" x="-80%" y="-80%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="10" result="b" />
-                <feMerge>
-                  <feMergeNode in="b" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-
-              <filter id="cloudBlur2" x="-60%" y="-60%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="10" />
-              </filter>
+              {/* subtle highlight overlay to give crescent depth */}
+              <linearGradient id="moonHighlight" x1="0" x2="1">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.46)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0.06)" />
+              </linearGradient>
             </defs>
 
-            <g style={{ filter: 'url(#moonGlow2)' }}>
-              <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#crescentMask)" />
-            </g>
+            {/* glow behind moon (pulsing) */}
+            <motion.circle
+              cx="60"
+              cy="60"
+              r="46"
+              fill="rgba(240,220,120,0.06)"
+              style={{ filter: 'url(#moonGlow)' }}
+              animate={{ opacity: [0.08, 0.14, 0.08], scale: [1, 1.03, 1] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            />
 
-            <circle cx="46" cy="62" r="4.2" fill="rgba(0,0,0,0.06)" opacity="0.95" />
-            <circle cx="74" cy="78" r="3.2" fill="rgba(0,0,0,0.05)" opacity="0.95" />
-            <circle cx="86" cy="54" r="2.8" fill="rgba(0,0,0,0.04)" opacity="0.95" />
+            {/* moon body with crescent mask */}
+            <circle cx="60" cy="60" r="40" fill="url(#moonG)" mask="url(#crescent)" />
+
+            {/* subtle highlight arc to accentuate crescent curvature */}
+            <path
+              d="M92 60 A32 32 0 0 1 52 92"
+              fill="none"
+              stroke="url(#moonHighlight)"
+              strokeWidth="2"
+              opacity="0.22"
+            />
+
+            {/* craters (soft) */}
+            <circle cx="46" cy="62" r="3.8" fill="rgba(0,0,0,0.06)" opacity="0.95" />
+            <circle cx="74" cy="78" r="2.8" fill="rgba(0,0,0,0.05)" opacity="0.95" />
+            <circle cx="86" cy="54" r="2.2" fill="rgba(0,0,0,0.04)" opacity="0.95" />
           </motion.svg>
 
-          {/* large dark-mode cloud overlay (subtle, layered) */}
+          {/* large dark cloud overlay (layered, more visible in dark mode) */}
           <motion.div
             aria-hidden="true"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.18, 0.08, 0] }}
+            animate={{ opacity: [0, 0.24, 0.12, 0] }}
             transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute inset-0 -z-19"
             style={{ pointerEvents: 'none' }}
           >
             <svg viewBox="0 0 1600 900" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
-              <g filter="url(#cloudBlur2)" fill="rgba(6,10,20,0.32)">
-                <motion.ellipse cx="300" cy="200" rx="480" ry="170" animate={{ x: [0, -40, 0] }} transition={{ duration: 36, repeat: Infinity }} />
-                <motion.ellipse cx="900" cy="320" rx="560" ry="200" animate={{ x: [0, 40, 0] }} transition={{ duration: 48, repeat: Infinity, delay: 4 }} />
-                <motion.ellipse cx="700" cy="520" rx="660" ry="240" animate={{ x: [0, 30, 0] }} transition={{ duration: 56, repeat: Infinity, delay: 6 }} />
+              <defs>
+                <filter id="cloudBlur" x="-60%" y="-60%" width="260%" height="260%">
+                  <feGaussianBlur stdDeviation="14" />
+                </filter>
+              </defs>
+
+              <g filter="url(#cloudBlur)" fill="rgba(6,10,20,0.34)">
+                <motion.ellipse cx="300" cy="200" rx="520" ry="180" animate={{ x: [0, -36, 0] }} transition={{ duration: 36, repeat: Infinity }} />
+                <motion.ellipse cx="920" cy="320" rx="600" ry="220" animate={{ x: [0, 36, 0] }} transition={{ duration: 48, repeat: Infinity, delay: 4 }} />
+                <motion.ellipse cx="700" cy="520" rx="720" ry="260" animate={{ x: [0, 30, 0] }} transition={{ duration: 56, repeat: Infinity, delay: 6 }} />
+                <motion.ellipse cx="1300" cy="160" rx="380" ry="120" animate={{ x: [0, -28, 0] }} transition={{ duration: 40, repeat: Infinity, delay: 2 }} />
               </g>
             </svg>
           </motion.div>
 
-          {/* stars layer */}
+          {/* stars layer (dark mode) */}
           <svg className="w-full h-full" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ zIndex: -20 }}>
             <defs>
-              <linearGradient id="starGrad2" x1="0" x2="1">
+              <linearGradient id="starGrad" x1="0" x2="1">
                 <stop offset="0%" stopColor="#fff9d9" />
                 <stop offset="100%" stopColor="#ffe77a" />
               </linearGradient>
@@ -310,7 +308,7 @@ const Hero = () => {
                   animate={{ opacity: [0.12, 1, 0.12], scale: [1, 1.12, 1] }}
                   transition={{ duration: 1.4 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
                 >
-                  <circle cx={cx + jitterX} cy={cy + jitterY} r={s.r * 0.9} fill="url(#starGrad2)" opacity={0.95} />
+                  <circle cx={cx + jitterX} cy={cy + jitterY} r={s.r * 0.9} fill="url(#starGrad)" opacity={0.95} />
                 </motion.g>
               );
             })}
