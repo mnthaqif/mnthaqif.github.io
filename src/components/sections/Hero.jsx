@@ -108,7 +108,7 @@ const Hero = () => {
       >
         <defs>
           <filter id="blurSoft" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="24" /> {/* reduced from 56 -> clearer */}
+            <feGaussianBlur stdDeviation="56" />
           </filter>
         </defs>
 
@@ -140,16 +140,16 @@ const Hero = () => {
         <defs>
           {/* gradient gives a soft 3D feel (lighter top, darker bottom) */}
           <linearGradient id="smokeGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
-            <stop offset="40%" stopColor="rgba(220,220,225,0.7)" />
-            <stop offset="100%" stopColor="rgba(160,160,170,0.34)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.75)" />
+            <stop offset="40%" stopColor="rgba(220,220,225,0.6)" />
+            <stop offset="100%" stopColor="rgba(160,160,170,0.25)" />
           </linearGradient>
 
-          {/* inner shadow to add some depth to clouds (reduced blur) */}
-          <filter id="smokeShadow" x="-40%" y="-40%" width="180%" height="180%">
-            <feOffset dx="0" dy="4" result="off" />
-            <feGaussianBlur in="off" stdDeviation="6" result="blur" /> {/* reduced for clearer shape */}
-            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0 0.05  0 0 0 0.45 0" result="shadow"/>
+          {/* inner shadow to add some depth to clouds */}
+          <filter id="smokeShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feOffset dx="0" dy="6" result="off" />
+            <feGaussianBlur in="off" stdDeviation="12" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.06  0 0 0 0.5 0" result="shadow"/>
             <feMerge>
               <feMergeNode in="shadow" />
               <feMergeNode in="SourceGraphic" />
@@ -171,10 +171,10 @@ const Hero = () => {
               transition={{ duration: 28 + (i % 5), repeat: Infinity, delay: c.delay, ease: 'easeInOut' }}
               style={{ filter: 'url(#smokeShadow)', transformOrigin: 'center' }}
             >
-              {/* 3 overlapping ellipses with slight offsets & gradient fill to simulate 3D puff, with clearer edges */}
-              <ellipse cx="-36" cy="2" rx="48" ry="20" fill="url(#smokeGrad)" opacity="0.88" />
-              <ellipse cx="0" cy="-6" rx="64" ry="26" fill="url(#smokeGrad)" opacity="0.93" />
-              <ellipse cx="44" cy="6" rx="40" ry="18" fill="url(#smokeGrad)" opacity="0.85" />
+              {/* 3 overlapping ellipses with slight offsets & gradient fill to simulate 3D puff */}
+              <ellipse cx="-36" cy="0" rx="48" ry="20" fill="url(#smokeGrad)" opacity="0.85" />
+              <ellipse cx="0" cy="-6" rx="64" ry="26" fill="url(#smokeGrad)" opacity="0.9" />
+              <ellipse cx="44" cy="6" rx="40" ry="18" fill="url(#smokeGrad)" opacity="0.8" />
             </motion.g>
           );
         })}
@@ -257,7 +257,7 @@ const Hero = () => {
             <circle cx="86" cy="54" r="2.8" fill="rgba(0,0,0,0.04)" opacity="0.95" />
           </motion.svg>
 
-          {/* drifting cloud clusters (large, soft but clearer) */}
+          {/* drifting cloud clusters (large, soft) */}
           <motion.div
             aria-hidden="true"
             initial={{ opacity: 0.0 }}
@@ -269,7 +269,7 @@ const Hero = () => {
             <svg viewBox="0 0 1600 900" className="w-full h-full" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <filter id="cloudBlurFull" x="-60%" y="-60%" width="260%" height="260%">
-                  <feGaussianBlur stdDeviation="10" /> {/* reduced from 24 -> clearer */}
+                  <feGaussianBlur stdDeviation="24" />
                 </filter>
               </defs>
 
@@ -321,7 +321,7 @@ const Hero = () => {
           >
             <defs>
               <filter id="cloudBlur2" x="-60%" y="-60%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="6" /> {/* reduced from 10 -> clearer edges */}
+                <feGaussianBlur stdDeviation="10" />
               </filter>
 
               <linearGradient id="starGrad2" x1="0" x2="1">
@@ -440,7 +440,7 @@ const Hero = () => {
                 border: '2px solid rgba(59,130,246,0.09)',
               }}
               initial={{ scale: 1, opacity: 0.16 }}
-              animate{{ scale: [1, 1.6], opacity: [0.16, 0] }}
+              animate={{ scale: [1, 1.6], opacity: [0.16, 0] }}
               transition={{ duration: 3.6, repeat: Infinity, ease: 'easeOut', delay: 0.6 }}
             />
 
