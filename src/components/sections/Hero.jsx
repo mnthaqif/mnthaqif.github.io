@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
 
-/** Typing with blinking caret (motion-based) */
+/** Typing with blinking caret sized relative to the text (uses em units) */
 function Typing({ text, speed = 80, className = '' }) {
   const [display, setDisplay] = useState('');
   useEffect(() => {
@@ -18,14 +18,22 @@ function Typing({ text, speed = 80, className = '' }) {
   }, [text, speed]);
 
   return (
-    <span className={className}>
-      {display}
+    <span className={className} style={{ display: 'inline-flex', alignItems: 'center' }}>
+      <span>{display}</span>
+      {/* caret sized using em so it matches the surrounding font-size */}
       <motion.span
         aria-hidden="true"
-        className="inline-block ml-2 w-1.5 h-6 align-middle rounded-sm"
+        style={{
+          display: 'inline-block',
+          width: '0.08em',
+          height: '1em',
+          marginLeft: '0.32em',
+          borderRadius: '2px',
+          backgroundColor: 'currentColor',
+          verticalAlign: 'middle',
+        }}
         animate={{ opacity: [1, 0, 1] }}
         transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
-        style={{ backgroundColor: 'currentColor' }}
       />
     </span>
   );
@@ -50,10 +58,12 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
       style={{ height: '100vh' }}
     >
-      {/* Vertical light-blue gradient in light mode; darker slate gradient in dark mode */}
-      <div className="absolute inset-0 -z-20 transition-colors duration-300
-                      bg-gradient-to-b from-sky-100 via-sky-50 to-white
-                      dark:from-slate-900 dark:via-slate-800 dark:to-slate-800" />
+      {/* vertical gradient background - darker so gradient is clearer; dark mode handled via Tailwind classes */}
+      <div
+        className="absolute inset-0 -z-20 transition-colors duration-300
+                   bg-gradient-to-b from-sky-300 via-sky-200 to-sky-100
+                   dark:from-slate-900 dark:via-slate-800 dark:to-slate-800"
+      />
 
       {/* subtle blurred background blobs (no centered oval) */}
       <svg
@@ -75,7 +85,7 @@ const Hero = () => {
           animate={{ x: [0, -16, 0], opacity: [0.18, 0.24, 0.18] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" opacity="0.18" />
+          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#bfeaff" opacity="0.18" />
         </motion.g>
 
         {/* right blob - low contrast */}
@@ -84,7 +94,7 @@ const Hero = () => {
           animate={{ y: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" opacity="0.14" />
+          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#dfffe8" opacity="0.14" />
         </motion.g>
       </svg>
 
@@ -92,20 +102,20 @@ const Hero = () => {
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mx-auto">
           {/* Avatar + wave rings */}
           <div className="relative inline-block mx-auto mb-6">
-            {/* expanding wave / ring 1 */}
+            {/* expanding ring 1 (subtle, uses current theme for visibility) */}
             <motion.span
               aria-hidden="true"
               className="absolute rounded-full"
               style={{
                 inset: 0,
                 borderRadius: '9999px',
-                border: '2px solid rgba(99,102,241,0.14)', // soft blue ring
+                border: '2px solid rgba(59,130,246,0.16)',
               }}
               initial={{ scale: 1, opacity: 0.28 }}
               animate={{ scale: [1, 1.9], opacity: [0.28, 0] }}
               transition={{ duration: 2.8, repeat: Infinity, ease: 'easeOut' }}
             />
-            {/* expanding wave / ring 2 (delayed) */}
+            {/* expanding ring 2 (delayed) */}
             <motion.span
               aria-hidden="true"
               className="absolute rounded-full"
@@ -123,39 +133,53 @@ const Hero = () => {
               variants={itemVariant}
               src={avatar}
               alt={personal.name}
-              className="relative z-10 w-36 h-36 md:w-44 md:h-44 rounded-full shadow-2xl border-4 border-white/80 dark:border-slate-700 object-cover"
+              className="relative z-10 w-36 h-36 md:w-44 md:h-44 rounded-full shadow-2xl object-cover"
+              style={{
+                // help reduce perceived blur: don't scale image up from a smaller source;
+                // prefer to supply a high-res image in src/assets. These flags help rendering
+                imageRendering: 'auto',
+                backfaceVisibility: 'hidden',
+                transform: 'translateZ(0)',
+              }}
               initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, y: [0, -10, 0], scale: [0.98, 1.06, 0.98] }}
-              transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+              animate={{ opacity: 1, y: [0, -12, 0], scale: [0.98, 1.06, 0.98] }}
+              transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut' }}
               whileHover={{ scale: 1.12, y: -6 }}
             />
           </div>
 
-          {/* Name: blue in light mode, white in dark mode */}
+          {/* Name: blue in light mode, white in dark mode; caret sized to match name */}
           <motion.h1 variants={itemVariant} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
             <Typing text={personal.name} speed={70} className="text-sky-700 dark:text-white" />
           </motion.h1>
 
-          {/* Larger title, location, about */}
-          <motion.p variants={itemVariant} className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 mb-3">
+          {/* Full-Stack Developer: fade-in animation */}
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.55 }}
+            className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 mb-3"
+          >
             {personal.title}
           </motion.p>
 
+          {/* Location larger */}
           <motion.p variants={itemVariant} className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-4">
             {personal.location}
           </motion.p>
 
+          {/* About me larger */}
           <motion.p variants={itemVariant} className="max-w-2xl mx-auto text-slate-600 dark:text-slate-400 mb-6 text-lg md:text-xl">
             I build web applications with JavaScript and React. I enjoy solving practical problems and improving my skills.
           </motion.p>
 
-          {/* Social icons: larger, circular background that adapts to light/dark, icons keep brand colors */}
+          {/* Social icons: circular background that adapts to light/dark, larger size, original icon colors */}
           <motion.div variants={itemVariant} className="flex justify-center gap-6 flex-wrap">
             <motion.a
               href={personal.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
+              className="p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
               aria-label="GitHub"
               whileHover={{ scale: 1.06, y: -3 }}
             >
@@ -168,7 +192,7 @@ const Hero = () => {
               href={personal.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
+              className="p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
               aria-label="LinkedIn"
               whileHover={{ scale: 1.06, y: -3 }}
             >
