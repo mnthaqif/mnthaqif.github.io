@@ -24,12 +24,28 @@ export const resumeData = {
   },
   
   skills: {
-    languages: ["JavaScript", "TypeScript", "Python", "Java", "Go"],
-    frontend: ["React", "Next.js", "Vue.js", "Tailwind CSS", "Redux", "Framer Motion"],
-    backend: ["Node.js", "Express", "Django", "FastAPI", "GraphQL", "REST APIs"],
-    databases: ["PostgreSQL", "MongoDB", "Redis", "MySQL"],
-    devops: ["AWS", "Docker", "Kubernetes", "CI/CD", "GitHub Actions"],
-    tools: ["Git", "VS Code", "Figma", "Postman", "Jira"]
+    languages: ["JavaScript", "TypeScript", "PHP", "C#"],
+    frontend: [
+    "React.js",
+    "Next.js",
+    "Kendo UI",
+    "Bootstrap",
+    "Tailwind CSS",
+    "Redux",
+    "Framer Motion",
+    "HTML",
+    "CSS"
+    ],
+    backend: [
+    "Node.js",
+    "NestJS",
+    "Express.js",
+    "REST APIs",
+    ".NET (ODBC Integration)"
+    ],
+    databases: ["MySQL", "Sequelize ORM"],
+    devops: ["CI/CD", "GitHub Actions"],
+    tools: ["Git", "GitLab", "GitHub", "VS Code", "Figma", "Postman", "Jira"]
   },
   
   experience: [
@@ -42,6 +58,8 @@ export const resumeData = {
       description: [
         "Develop and maintain full-stack web applications using React.js, TypeScript, Node.js, and NestJS.",
         "Integrate backend services with MySQL using Sequelize ORM for efficient data management.",
+        "Developed a .NET integration project to connect with QAD ERP via ODBC, enabling smooth data synchronization and automation.",
+        "Utilized Grafana webhook triggers to pull monitoring data, automate Excel report generation, and deliver scheduled email notifications.",
         "Implement UI components and dashboards using Kendo UI, Tailwind CSS, and HTML/CSS.",
         "Collaborate with cross-functional teams using GitLab and Jira following Agile methodology.",
         "Optimize and refactor existing systems for performance, scalability, and maintainability.",
