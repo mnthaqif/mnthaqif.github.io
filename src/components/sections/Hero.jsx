@@ -77,7 +77,7 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300 overflow-visible"
       style={{ height: '100vh' }}
     >
-      {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode */}
+      {/* Background gradient */}
       <div
         className={
           'absolute inset-0 -z-30 transition-colors duration-300 ' +
@@ -211,40 +211,34 @@ const Hero = () => {
                 </filter>
               </defs>
 
-              <g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)">
-                <motion.ellipse
-                  cx="300"
-                  cy="200"
-                  rx="420"
-                  ry="160"
-                  animate={{ x: [0, -40, 0] }}
-                  transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
-                />
-                <motion.ellipse
-                  cx="900"
-                  cy="320"
-                  rx="520"
-                  ry="200"
-                  animate={{ x: [0, 40, 0] }}
-                  transition={{ duration: 48, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
-                />
-                <motion.ellipse
-                  cx="1300"
-                  cy="180"
-                  rx="360"
-                  ry="140"
-                  animate={{ x: [0, -30, 0] }}
-                  transition={{ duration: 42, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-                />
-                <motion.ellipse
-                  cx="700"
-                  cy="520"
-                  rx="640"
-                  ry="220"
-                  animate={{ x: [0, 30, 0] }}
-                  transition={{ duration: 56, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
-                />
-              </g>
+              {/* animate each cluster across the page horizontally using framer-motion for continuous movement */}
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)"
+                animate={{ x: [-60, 60, -60] }}
+                transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+              >
+                <ellipse cx="300" cy="200" rx="420" ry="160" />
+              </motion.g>
+
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.20)"
+                animate={{ x: [60, -60, 60] }}
+                transition={{ duration: 72, repeat: Infinity, ease: 'linear', delay: 6 }}
+              >
+                <ellipse cx="900" cy="320" rx="520" ry="200" />
+              </motion.g>
+
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.18)"
+                animate={{ x: [-40, 40, -40] }}
+                transition={{ duration: 84, repeat: Infinity, ease: 'linear', delay: 12 }}
+              >
+                <ellipse cx="1300" cy="180" rx="360" ry="140" />
+              </motion.g>
+
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.16)"
+                animate={{ x: [40, -40, 40] }}
+                transition={{ duration: 96, repeat: Infinity, ease: 'linear', delay: 18 }}
+              >
+                <ellipse cx="700" cy="520" rx="640" ry="220" />
+              </motion.g>
             </svg>
           </motion.div>
 
