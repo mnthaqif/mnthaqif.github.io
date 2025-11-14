@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
 
-/** Typing with blinking caret (motion-based) */
+/** Typing with blinking caret sized to the name */
 function Typing({ text, speed = 80, className = '' }) {
   const [display, setDisplay] = useState('');
   useEffect(() => {
@@ -18,14 +18,21 @@ function Typing({ text, speed = 80, className = '' }) {
   }, [text, speed]);
 
   return (
-    <span className={className}>
-      {display}
+    <span className={className} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+      <span>{display}</span>
       <motion.span
         aria-hidden="true"
-        className="inline-block ml-2 w-1.5 h-6 align-middle rounded-sm"
+        // caret sized to the font by using em-based sizing so it matches the name
+        style={{
+          display: 'inline-block',
+          width: '0.45ch',
+          height: '1em',
+          borderRadius: '2px',
+          backgroundColor: 'currentColor',
+          verticalAlign: 'middle',
+        }}
         animate={{ opacity: [1, 0, 1] }}
         transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
-        style={{ backgroundColor: 'currentColor' }}
       />
     </span>
   );
@@ -38,7 +45,7 @@ const containerVariants = {
 
 const itemVariant = {
   hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
+  visible: (delay = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut', delay } }),
 };
 
 const Hero = () => {
@@ -48,14 +55,23 @@ const Hero = () => {
     <section
       aria-label="Hero"
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
-      style={{ height: '100vh' }}
+      style={{ height: '100vh' }} // full screen
     >
-      {/* Vertical light-blue gradient in light mode; darker slate gradient in dark mode */}
-      <div className="absolute inset-0 -z-20 transition-colors duration-300
-                      bg-gradient-to-b from-sky-100 via-sky-50 to-white
-                      dark:from-slate-900 dark:via-slate-800 dark:to-slate-800" />
+      {/* vertical light-blue gradient in light mode, darker gentle gradient in dark mode (tailwind dark: variants) */}
+      <div
+        className={
+          'absolute inset-0 -z-20 transition-colors duration-300 ' +
+          'bg-gradient-to-b from-sky-300 via-sky-150 to-white ' +
+          'dark:from-slate-800 dark:via-slate-900 dark:to-slate-850'
+        }
+        // fallback inline style so colors show even if Tailwind custom shades are missing
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(152,216,255,1) 0%, rgba(233,246,255,1) 50%, rgba(255,255,255,1) 100%)',
+        }}
+      />
 
-      {/* subtle blurred background blobs (no centered oval) */}
+      {/* subtle blurred background blobs only, no centered oval */}
       <svg
         className="absolute inset-0 w-full h-full -z-10 pointer-events-none"
         viewBox="0 0 1200 700"
@@ -69,7 +85,6 @@ const Hero = () => {
           </filter>
         </defs>
 
-        {/* left blob - low contrast */}
         <motion.g
           filter="url(#blurSoft)"
           animate={{ x: [0, -16, 0], opacity: [0.18, 0.24, 0.18] }}
@@ -78,7 +93,6 @@ const Hero = () => {
           <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" opacity="0.18" />
         </motion.g>
 
-        {/* right blob - low contrast */}
         <motion.g
           filter="url(#blurSoft)"
           animate={{ y: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
@@ -90,28 +104,30 @@ const Hero = () => {
 
       <div className="max-w-4xl mx-auto text-center w-full px-4">
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mx-auto">
-          {/* Avatar + wave rings */}
+          {/* Avatar with animated wave rings */}
           <div className="relative inline-block mx-auto mb-6">
-            {/* expanding wave / ring 1 */}
+            {/* ring 1 */}
             <motion.span
               aria-hidden="true"
               className="absolute rounded-full"
               style={{
                 inset: 0,
                 borderRadius: '9999px',
-                border: '2px solid rgba(99,102,241,0.14)', // soft blue ring
+                boxSizing: 'border-box',
+                border: '2px solid rgba(59,130,246,0.16)',
               }}
               initial={{ scale: 1, opacity: 0.28 }}
               animate={{ scale: [1, 1.9], opacity: [0.28, 0] }}
               transition={{ duration: 2.8, repeat: Infinity, ease: 'easeOut' }}
             />
-            {/* expanding wave / ring 2 (delayed) */}
+            {/* ring 2 delayed */}
             <motion.span
               aria-hidden="true"
               className="absolute rounded-full"
               style={{
                 inset: 0,
                 borderRadius: '9999px',
+                boxSizing: 'border-box',
                 border: '2px solid rgba(59,130,246,0.10)',
               }}
               initial={{ scale: 1, opacity: 0.18 }}
@@ -119,47 +135,63 @@ const Hero = () => {
               transition={{ duration: 3.6, repeat: Infinity, ease: 'easeOut', delay: 0.6 }}
             />
 
+            {/* High-resolution rendering hints and sizing to reduce blur (replace image with a high-res source if available) */}
             <motion.img
               variants={itemVariant}
+              custom={0}
               src={avatar}
+              srcSet={`${avatar} 1x, ${avatar} 2x`}
+              sizes="(max-width: 768px) 9rem, 11rem"
               alt={personal.name}
-              className="relative z-10 w-36 h-36 md:w-44 md:h-44 rounded-full shadow-2xl border-4 border-white/80 dark:border-slate-700 object-cover"
+              className="relative z-10 w-36 h-36 md:w-44 md:h-44 rounded-full shadow-2xl border-4 border-white/85 dark:border-slate-700 object-cover"
+              style={{ imageRendering: 'auto' }}
+              fetchPriority="high"
+              loading="eager"
               initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, y: [0, -10, 0], scale: [0.98, 1.06, 0.98] }}
+              animate={{ opacity: 1, y: [0, -12, 0], scale: [0.98, 1.06, 0.98] }}
               transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
               whileHover={{ scale: 1.12, y: -6 }}
             />
           </div>
 
-          {/* Name: blue in light mode, white in dark mode */}
-          <motion.h1 variants={itemVariant} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
+          {/* Name: blue in light mode, white in dark mode; typing caret sized to match */}
+          <motion.h1 variants={itemVariant} custom={0.1} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
             <Typing text={personal.name} speed={70} className="text-sky-700 dark:text-white" />
           </motion.h1>
 
-          {/* Larger title, location, about */}
-          <motion.p variants={itemVariant} className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 mb-3">
+          {/* Full-Stack Developer: fade-in animation */}
+          <motion.p
+            variants={itemVariant}
+            custom={0.2}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 mb-3"
+          >
             {personal.title}
           </motion.p>
 
-          <motion.p variants={itemVariant} className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-4">
+          {/* location - larger */}
+          <motion.p variants={itemVariant} custom={0.25} className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-4">
             {personal.location}
           </motion.p>
 
-          <motion.p variants={itemVariant} className="max-w-2xl mx-auto text-slate-600 dark:text-slate-400 mb-6 text-lg md:text-xl">
+          {/* about - larger */}
+          <motion.p variants={itemVariant} custom={0.3} className="max-w-2xl mx-auto text-slate-600 dark:text-slate-400 mb-6 text-lg md:text-xl">
             I build web applications with JavaScript and React. I enjoy solving practical problems and improving my skills.
           </motion.p>
 
-          {/* Social icons: larger, circular background that adapts to light/dark, icons keep brand colors */}
-          <motion.div variants={itemVariant} className="flex justify-center gap-6 flex-wrap">
+          {/* Social icons: circular backgrounds adapt to light/dark, bigger icons, removed email */}
+          <motion.div variants={itemVariant} custom={0.4} className="flex justify-center gap-6 flex-wrap">
             <motion.a
               href={personal.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
+              className="p-3.5 md:p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
               aria-label="GitHub"
               whileHover={{ scale: 1.06, y: -3 }}
             >
-              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="#181717" aria-hidden="true">
+              <svg className="w-9 h-9 md:w-10 md:h-10" viewBox="0 0 24 24" fill="#181717" aria-hidden="true">
                 <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
               </svg>
             </motion.a>
@@ -168,11 +200,11 @@ const Hero = () => {
               href={personal.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-3 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
+              className="p-3.5 md:p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
               aria-label="LinkedIn"
               whileHover={{ scale: 1.06, y: -3 }}
             >
-              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true">
+              <svg className="w-9 h-9 md:w-10 md:h-10" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
             </motion.a>
