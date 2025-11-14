@@ -1,16 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import avatar from '../../assets/thaqif.jpg'; // ensure file exists at src/assets/thaqif.jpg
+import { resumeData } from '../../data/resumeData';
+import avatar from '../../assets/thaqif.jpg';
 
-/**
- * Soft, clean Hero (light) with subtle animations:
- * - animated blurred background blobs (slow float / drift)
- * - entrance animation with staggered children
- * - gentle avatar float + hover scale
- * - animated icon hover interactions
- */
 const containerVariants = {
-  hidden: { opacity: 0, y: 6 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
@@ -19,21 +13,25 @@ const containerVariants = {
 };
 
 const childVariant = {
-  hidden: { opacity: 0, y: 6 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
 };
 
 const Hero = () => {
+  const { personal } = resumeData;
+
   return (
     <section
-      aria-label="Hero"
-      className="relative flex items-center justify-center overflow-hidden"
+      className="min-h-screen flex items-center justify-center section-padding"
       style={{
         minHeight: '54vh',
-        background: 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 50%, #ffffff 100%)',
+        // soft light blue base + very subtle 10% gradient overlay
+        background:
+          'linear-gradient(180deg, rgba(219,234,254,0.10) 0%, rgba(235,248,255,0.10) 100%), #eaf9ff',
       }}
+      aria-label="Hero"
     >
-      {/* Soft decorative background shapes with motion */}
+      {/* animated soft background shapes */}
       <svg
         className="absolute inset-0 w-full h-full -z-10"
         viewBox="0 0 1200 700"
@@ -43,104 +41,121 @@ const Hero = () => {
       >
         <defs>
           <filter id="blurSoft" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="60" />
+            <feGaussianBlur stdDeviation="56" />
           </filter>
         </defs>
 
-        {/* left muted blur - slow horizontal float */}
+        {/* left float */}
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ x: [0, -18, 0] }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-        >
-          <ellipse cx="180" cy="220" rx="300" ry="160" fill="#c7d2fe" opacity="0.20" />
-        </motion.g>
-
-        {/* right muted blur - slow vertical float */}
-        <motion.g
-          filter="url(#blurSoft)"
-          animate={{ y: [0, -14, 0] }}
+          animate={{ x: [0, -20, 0], opacity: [0.22, 0.28, 0.22] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="980" cy="260" rx="320" ry="180" fill="#bbf7d0" opacity="0.16" />
+          <ellipse cx="180" cy="220" rx="300" ry="160" fill="#c7e7ff" opacity="0.22" />
         </motion.g>
 
-        {/* very subtle slow rotation for an extra organic feeling */}
+        {/* right float */}
         <motion.g
-          style={{ transformOrigin: '50% 50%' }}
-          animate={{ rotate: [0, 2, 0] }}
-          transition={{ duration: 30, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
+          filter="url(#blurSoft)"
+          animate={{ y: [0, -16, 0], opacity: [0.16, 0.2, 0.16] }}
+          transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <rect x="0" y="0" width="100%" height="100%" fill="transparent" />
+          <ellipse cx="980" cy="260" rx="320" ry="180" fill="#dfffe8" opacity="0.16" />
         </motion.g>
+
+        {/* faint radial wash for center focus */}
+        <rect width="100%" height="100%" fill="rgba(255,255,255,0.04)" />
       </svg>
 
-      {/* content card: light, soft shadow with entrance animation */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 w-full max-w-2xl mx-4 sm:mx-6 md:mx-0 bg-white rounded-xl shadow-lg border border-slate-100 py-6 px-5 sm:px-8"
-      >
-        <motion.div variants={childVariant} className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+      <div className="max-w-4xl mx-auto text-center w-full px-4">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="mx-auto"
+        >
           <motion.img
+            variants={childVariant}
             src={avatar}
-            alt="Muhammad Nur Thaqif avatar"
-            initial={{ scale: 0.995, y: 0 }}
-            animate={{ y: [0, -6, 0] }}
+            alt={personal.name}
+            className="w-32 h-32 md:w-40 md:h-40 rounded-full mx-auto mb-6 shadow-lg border-4 border-white/60"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: [0.98, 1.02, 0.98] }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            whileHover={{ scale: 1.06 }}
-            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-2 border-slate-100 shadow-sm"
           />
 
-          <div className="text-center sm:text-left">
-            <motion.h1 variants={childVariant} className="text-2xl sm:text-3xl font-medium text-slate-900 leading-tight">
-              Muhammad Nur Thaqif
-            </motion.h1>
+          <motion.h1
+            variants={childVariant}
+            className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-3 bg-clip-text text-transparent"
+            // subtle moving gradient on the text
+            style={{
+              backgroundImage:
+                'linear-gradient(90deg, rgba(6,182,212,0.95), rgba(59,130,246,0.95))',
+              backgroundSize: '200% 200%',
+            }}
+            animate={{ backgroundPosition: ['0% 50%', '100% 50%'] }}
+            transition={{ duration: 8, repeat: Infinity, repeatType: 'reverse', ease: 'linear' }}
+          >
+            {personal.name}
+          </motion.h1>
 
-            <motion.p variants={childVariant} className="mt-1 text-sm sm:text-base text-slate-600">
-              Melaka, Malaysia • Full‑Stack Developer
-            </motion.p>
+          <motion.p
+            variants={childVariant}
+            className="text-xl md:text-2xl text-slate-700 mb-4"
+          >
+            {personal.title}
+          </motion.p>
 
-            <motion.div variants={childVariant} className="mt-3 flex items-center justify-center sm:justify-start gap-3">
-              {/* GitHub */}
-              <motion.a
-                href="https://github.com/mnthaqif"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub profile"
-                whileHover={{ scale: 1.04, translateY: -2 }}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-50 text-sm text-slate-800 transition"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path fillRule="evenodd" d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.33 6.84 9.68.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.61-3.37-1.36-3.37-1.36-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1.01.07 1.54 1.06 1.54 1.06.9 1.57 2.36 1.12 2.94.85.09-.66.35-1.12.63-1.38-2.22-.26-4.56-1.13-4.56-5.03 0-1.11.39-2.02 1.03-2.73-.1-.26-.45-1.31.1-2.73 0 0 .84-.27 2.75 1.03A9.3 9.3 0 0112 6.8c.85.004 1.71.115 2.51.34 1.9-1.3 2.74-1.03 2.74-1.03.56 1.42.21 2.47.11 2.73.64.71 1.03 1.62 1.03 2.73 0 3.91-2.34 4.77-4.57 5.03.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.59.69.49A10.24 10.24 0 0022 12.22C22 6.58 17.52 2 12 2z" clipRule="evenodd"/>
-                </svg>
-                <span className="hidden sm:inline">GitHub</span>
-              </motion.a>
+          <motion.p
+            variants={childVariant}
+            className="text-lg text-slate-600 mb-6"
+          >
+            {personal.location}
+          </motion.p>
 
-              {/* LinkedIn */}
-              <motion.a
-                href="https://www.linkedin.com/in/thaqif-rajab/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn profile"
-                whileHover={{ scale: 1.04, translateY: -2 }}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-gradient-to-r from-indigo-50 to-sky-50 text-sm text-slate-800 hover:from-indigo-100 hover:to-sky-100 transition"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M20.45 20.45h-3.555V14.8c0-1.345-.025-3.076-1.875-3.076-1.875 0-2.16 1.462-2.16 2.973v5.753H8.34V9h3.414v1.56h.049c.476-.9 1.636-1.848 3.368-1.848 3.6 0 4.266 2.37 4.266 5.455v6.783zM5.337 7.433a2.07 2.07 0 11.001-4.139 2.07 2.07 0 01-.001 4.139zM6.997 20.45H3.67V9h3.327v11.45z" />
-                </svg>
-                <span className="hidden sm:inline">LinkedIn</span>
-              </motion.a>
-            </motion.div>
-          </div>
+          <motion.div
+            variants={childVariant}
+            className="flex justify-center gap-4 flex-wrap"
+          >
+            <motion.a
+              href={personal.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 rounded-full bg-white/80 hover:bg-primary-100 transition-colors shadow-sm"
+              aria-label="GitHub"
+              whileHover={{ scale: 1.06 }}
+            >
+              <svg className="w-6 h-6 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+              </svg>
+            </motion.a>
+
+            <motion.a
+              href={personal.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 rounded-full bg-white/80 hover:bg-primary-100 transition-colors shadow-sm"
+              aria-label="LinkedIn"
+              whileHover={{ scale: 1.06 }}
+            >
+              <svg className="w-6 h-6 text-slate-800" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+            </motion.a>
+
+            <motion.a
+              href={`mailto:${personal.email}`}
+              className="p-3 rounded-full bg-white/80 hover:bg-primary-100 transition-colors shadow-sm"
+              aria-label="Email"
+              whileHover={{ scale: 1.06 }}
+            >
+              <svg className="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </motion.a>
+          </motion.div>
         </motion.div>
-
-        <motion.p variants={childVariant} className="mt-5 text-sm sm:text-base text-slate-600 max-w-xl mx-auto text-center sm:text-left">
-          I build web applications with JavaScript and React. I solve practical problems and keep learning
-          new tools to improve my work.
-        </motion.p>
-      </motion.div>
+      </div>
     </section>
   );
 };
