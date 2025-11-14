@@ -31,7 +31,6 @@ export const resumeData = {
     "Kendo UI",
     "Bootstrap",
     "Tailwind CSS",
-    "Redux",
     "Framer Motion",
     "HTML",
     "CSS"
@@ -70,7 +69,7 @@ export const resumeData = {
     {
       company: "EDESS Education Development and Solutions Specialist Sdn. Bhd.",
       position: "PHP Programmer",
-      location: "Remote",
+      location: "Skudai, Johor",
       startDate: "Jan 2021",
       endDate: "Mac 2023",
       description: [
@@ -84,8 +83,8 @@ export const resumeData = {
     {
       company: "Integrasys Solution Sdn. Bhd.",
       position: "Frontend Developer",
-      location: "New York, NY",
-      startDate: "Jan 2018",
+      location: "Skudai, Johor",
+      startDate: "Oct 2017",
       endDate: "May 2019",
       description: [
         "Developed responsive front-end interfaces using HTML5, CSS, and Bootstrap.",
