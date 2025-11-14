@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
@@ -50,7 +50,7 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // static star positions (background)
+  // star positions (percent-based)
   const stars = [
     { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
     { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
@@ -71,60 +71,37 @@ const Hero = () => {
     { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
-  // active shooting stars state (randomized per spawn)
-  const [activeShots, setActiveShots] = useState([]);
-  const spawnIntervalRef = useRef(null);
+  // shooting stars state (randomized at mount)
+  const [shootingStars, setShootingStars] = useState([]);
 
   useEffect(() => {
-    // spawn function - creates a randomized shooting star and schedules removal
+    // helper random functions
     const rand = (min, max) => Math.random() * (max - min) + min;
     const randInt = (min, max) => Math.floor(rand(min, max + 1));
 
-    const spawn = () => {
-      // limit concurrent stars to avoid overload
-      setActiveShots(prev => {
-        if (prev.length >= 6) return prev; // cap concurrent shooting stars
-        const sx = rand(4, 96); // percent across width
-        const sy = rand(4, 60); // percent down height
-        const angle = rand(12, 32); // angle degrees
-        const len = rand(320, 880); // px
-        const duration = rand(0.9, 1.6);
-        const headRadius = rand(2.0, 3.6);
-        const id = `shot-${Date.now()}-${randInt(0, 9999)}`;
-        const repeatDelay = 0; // not used here; removal is handled individually
-        const star = { id, sx, sy, angle, len, duration, headRadius };
-        return [...prev, star];
-      });
-    };
-
-    // spawn first immediately and then every 3s
-    spawn();
-    spawnIntervalRef.current = setInterval(spawn, 3000);
-
-    return () => {
-      clearInterval(spawnIntervalRef.current);
-      spawnIntervalRef.current = null;
-    };
-  }, []);
-
-  // remove shot after its duration + small buffer
-  useEffect(() => {
-    // Set cleanup timers for newly added shots
-    if (activeShots.length === 0) return;
-    const timers = activeShots.map(st => {
-      const t = setTimeout(() => {
-        setActiveShots(prev => prev.filter(p => p.id !== st.id));
-      }, (st.duration + 0.6) * 1000); // remove after animation ends
-      return t;
+    // generate N shooting stars with randomized params
+    const N = 8;
+    const arr = Array.from({ length: N }).map((_, i) => {
+      const sx = rand(2, 96); // % across width
+      const sy = rand(2, 55); // % across height (keep from too low to not overlap content)
+      const angle = rand(12, 32); // diagonal angle degrees
+      const len = rand(300, 900); // px length of trajectory
+      const duration = rand(0.9, 1.6); // seconds
+      const initialDelay = rand(0, 18); // initial start delay
+      const repeatDelay = rand(8, 22); // gap between repeats
+      const headRadius = rand(2.2, 3.6);
+      return { sx, sy, angle, len, duration, delay: initialDelay, repeatDelay, headRadius, id: `rnd-${Date.now()}-${i}` };
     });
-    return () => timers.forEach(t => clearTimeout(t));
-  }, [activeShots]);
+
+    setShootingStars(arr);
+    // regenerate on mount only
+  }, []);
 
   return (
     <section
       aria-label="Hero"
-      className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
-      style={{ height: '100vh', overflow: 'visible' }}
+      className="min-h-screen flex items-center justify-center relative transition-colors duration-300 overflow-visible"
+      style={{ height: '100vh' }}
     >
       {/* Background gradient */}
       <div
@@ -167,10 +144,10 @@ const Hero = () => {
         </motion.g>
       </svg>
 
-      {/* Dark-sky: moon, clouds, stars, and randomized shooting stars */}
+      {/* Dark-sky: moon (SVG with crescent mask + glow), clouds, stars, and shooting stars */}
       <div className="absolute inset-0 pointer-events-none -z-20">
         <div className="hidden dark:block w-full h-full">
-          {/* Moon (crescent with glow) */}
+          {/* crescent moon (SVG) */}
           <motion.svg
             aria-hidden="true"
             viewBox="0 0 120 120"
@@ -181,12 +158,14 @@ const Hero = () => {
             style={{ zIndex: -18 }}
           >
             <defs>
+              {/* moon surface gradient */}
               <radialGradient id="moonG2" cx="35%" cy="22%">
                 <stop offset="0%" stopColor="#fffde6" stopOpacity="1" />
                 <stop offset="60%" stopColor="#fff2ab" stopOpacity="1" />
                 <stop offset="100%" stopColor="#f0d87f" stopOpacity="1" />
               </radialGradient>
 
+              {/* mask for crescent phase */}
               <mask id="phaseMask">
                 <rect x="0" y="0" width="120" height="120" fill="white" />
                 <motion.circle
@@ -199,6 +178,7 @@ const Hero = () => {
                 />
               </mask>
 
+              {/* glow filter for moon */}
               <filter id="moonGlow2" x="-120%" y="-120%" width="340%" height="340%">
                 <feGaussianBlur stdDeviation="10" result="b" />
                 <feMerge>
@@ -207,7 +187,7 @@ const Hero = () => {
                 </feMerge>
               </filter>
 
-              {/* shooting star gradient + glow filter */}
+              {/* shooting star gradient + glow */}
               <linearGradient id="shootGrad" x1="0" x2="1" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
                 <stop offset="40%" stopColor="#fff8da" stopOpacity="0.95" />
@@ -225,10 +205,12 @@ const Hero = () => {
               </filter>
             </defs>
 
+            {/* glow group (applies mask so only halo around visible crescent shows) */}
             <g style={{ filter: 'url(#moonGlow2)' }}>
               <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
             </g>
 
+            {/* pulsing halo (subtle, behind moon) */}
             <motion.circle
               cx="60"
               cy="60"
@@ -238,8 +220,10 @@ const Hero = () => {
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             />
 
+            {/* moon body with crescent mask applied */}
             <circle cx="60" cy="60" r="40" fill="url(#moonG2)" mask="url(#phaseMask)" />
 
+            {/* subtle highlight arc for crescent depth */}
             <path
               d="M92 60 A32 32 0 0 1 52 92"
               fill="none"
@@ -248,12 +232,13 @@ const Hero = () => {
               opacity="0.22"
             />
 
+            {/* small craters */}
             <circle cx="46" cy="62" r="4.2" fill="rgba(0,0,0,0.06)" opacity="0.95" />
             <circle cx="74" cy="78" r="3.2" fill="rgba(0,0,0,0.05)" opacity="0.95" />
             <circle cx="86" cy="54" r="2.8" fill="rgba(0,0,0,0.04)" opacity="0.95" />
           </motion.svg>
 
-          {/* drifting cloud clusters */}
+          {/* drifting cloud clusters (large, soft) */}
           <motion.div
             aria-hidden="true"
             initial={{ opacity: 0.0 }}
@@ -269,6 +254,7 @@ const Hero = () => {
                 </filter>
               </defs>
 
+              {/* animate each cluster across the page horizontally */}
               <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)"
                 animate={{ x: [-60, 60, -60] }}
                 transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
@@ -299,7 +285,7 @@ const Hero = () => {
             </svg>
           </motion.div>
 
-          {/* stars, layered clouds, and randomized shooting stars */}
+          {/* stars + layered cloud detail + enhanced shooting stars */}
           <svg
             className="w-full h-full"
             viewBox="0 0 1200 700"
@@ -375,7 +361,7 @@ const Hero = () => {
               </g>
             </motion.g>
 
-            {/* background static stars */}
+            {/* star field */}
             {stars.map((s, idx) => {
               const cx = (s.x / 100) * 1200;
               const cy = (s.y / 100) * 700;
@@ -393,8 +379,8 @@ const Hero = () => {
               );
             })}
 
-            {/* randomized shooting stars that spawn every 3s */}
-            {activeShots.map((st) => {
+            {/* enhanced, randomized shooting stars */}
+            {shootingStars.map((st, i) => {
               const startX = (st.sx / 100) * 1200;
               const startY = (st.sy / 100) * 700;
               const rad = (st.angle * Math.PI) / 180;
@@ -412,11 +398,13 @@ const Hero = () => {
                   animate={{ x: [0, dx], y: [0, dy], opacity: [0, 1, 0] }}
                   transition={{
                     duration: st.duration,
-                    delay: 0, // start immediately when added
+                    delay: st.delay,
                     ease: 'easeOut',
-                    repeat: 0,
+                    repeat: Infinity,
+                    repeatDelay: st.repeatDelay,
                   }}
                 >
+                  {/* tapered trail */}
                   <motion.line
                     x1={trailX}
                     y1={trailY}
@@ -432,11 +420,14 @@ const Hero = () => {
                     animate={{ strokeDashoffset: [trailLen, 0], opacity: [0, 1, 0] }}
                     transition={{
                       duration: st.duration,
+                      delay: st.delay,
                       ease: 'easeOut',
-                      repeat: 0,
+                      repeat: Infinity,
+                      repeatDelay: st.repeatDelay,
                     }}
                   />
 
+                  {/* head - bright glowing dot with stronger glow */}
                   <motion.circle
                     cx={0}
                     cy={0}
@@ -447,8 +438,10 @@ const Hero = () => {
                     animate={{ opacity: [0, 1, 0], scale: [0.6, 1.0, 0.8] }}
                     transition={{
                       duration: st.duration,
+                      delay: st.delay,
                       ease: 'easeOut',
-                      repeat: 0,
+                      repeat: Infinity,
+                      repeatDelay: st.repeatDelay,
                     }}
                   />
                 </motion.g>
@@ -534,7 +527,7 @@ const Hero = () => {
             I build web applications with JavaScript and React. I enjoy solving practical problems and improving my skills.
           </motion.p>
 
-          {/* Social icons */}
+          {/* Social icons (kept same) */}
           <motion.div variants={itemVariant} custom={0.4} className="flex justify-center gap-6 flex-wrap">
             <motion.a
               href={personal.github}
