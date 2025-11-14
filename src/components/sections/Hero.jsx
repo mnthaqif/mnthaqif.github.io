@@ -50,32 +50,43 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // more star positions (percent) and subtle delays for twinkle
+  // expanded star positions for denser, subtle night sky
   const stars = [
-    { x: 6, y: 10, r: 1.6, d: 0 },
-    { x: 12, y: 20, r: 1.2, d: 0.2 },
-    { x: 22, y: 8, r: 1.1, d: 0.6 },
-    { x: 30, y: 14, r: 1.3, d: 1.0 },
-    { x: 42, y: 6, r: 1.4, d: 0.2 },
-    { x: 50, y: 18, r: 1.1, d: 0.9 },
-    { x: 58, y: 12, r: 1.0, d: 0.8 },
-    { x: 66, y: 7, r: 1.3, d: 1.1 },
-    { x: 74, y: 16, r: 1.2, d: 0.4 },
-    { x: 86, y: 9, r: 1.2, d: 0.9 },
-    { x: 92, y: 4, r: 1.0, d: 0.7 },
-    { x: 18, y: 28, r: 1.0, d: 1.2 },
-    { x: 28, y: 26, r: 0.9, d: 0.5 },
-    { x: 36, y: 22, r: 1.3, d: 0.3 },
-    { x: 46, y: 30, r: 0.9, d: 1.4 },
-    { x: 76, y: 28, r: 1.0, d: 0.6 },
-    { x: 84, y: 24, r: 1.1, d: 1.0 },
-    { x: 96, y: 22, r: 0.8, d: 0.2 },
+    { x: 4, y: 8, r: 1.1, d: 0.1 },
+    { x: 10, y: 18, r: 1.3, d: 0.4 },
+    { x: 18, y: 6, r: 1.0, d: 0.2 },
+    { x: 26, y: 14, r: 1.6, d: 0.7 },
+    { x: 34, y: 4, r: 1.2, d: 0.3 },
+    { x: 42, y: 10, r: 1.0, d: 0.9 },
+    { x: 50, y: 6, r: 1.4, d: 0.6 },
+    { x: 58, y: 12, r: 1.1, d: 0.8 },
+    { x: 66, y: 7, r: 1.0, d: 1.1 },
+    { x: 74, y: 20, r: 1.3, d: 0.5 },
+    { x: 82, y: 9, r: 1.2, d: 0.9 },
+    { x: 90, y: 5, r: 0.9, d: 0.2 },
+
+    { x: 8, y: 26, r: 0.9, d: 1.3 },
+    { x: 20, y: 24, r: 1.0, d: 0.5 },
+    { x: 28, y: 22, r: 1.3, d: 0.3 },
+    { x: 36, y: 28, r: 0.9, d: 1.4 },
+    { x: 46, y: 30, r: 1.2, d: 0.6 },
+    { x: 56, y: 26, r: 1.0, d: 0.8 },
+    { x: 64, y: 32, r: 1.1, d: 1.0 },
+    { x: 72, y: 30, r: 0.8, d: 0.7 },
+    { x: 80, y: 28, r: 1.0, d: 0.9 },
+    { x: 88, y: 26, r: 0.9, d: 0.4 },
+
+    // a few lower stars for depth
+    { x: 12, y: 40, r: 0.8, d: 1.0 },
+    { x: 44, y: 46, r: 0.9, d: 1.2 },
+    { x: 68, y: 44, r: 1.0, d: 0.6 },
+    { x: 92, y: 38, r: 0.8, d: 0.7 },
   ];
 
   return (
     <section
       aria-label="Hero"
-      className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
+      className="min-h-screen flex items-center justify-center relative transition-colors duration-300 overflow-visible"
       style={{ height: '100vh' }}
     >
       {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode */}
@@ -120,123 +131,119 @@ const Hero = () => {
       </svg>
 
       {/* Dark-sky: moon, improved clouds and more twinkling stars (visible only in dark mode) */}
-      <div className="hidden dark:block absolute inset-0 pointer-events-none -z-20">
+      <div className="absolute inset-0 pointer-events-none -z-20 dark:block hidden">
+        {/* Moon as CSS-backed, responsive element so it is always visible on small screens */}
+        <motion.div
+          aria-hidden="true"
+          initial={{ x: -2 }}
+          animate={{ x: [0, 3, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-4 top-4 md:left-20 md:top-12"
+          style={{ zIndex: -19 }}
+        >
+          <div
+            // responsive sizes: small screens show smaller moon but still visible; md+ larger moon
+            className="rounded-full shadow-[0_0_40px_rgba(255,220,90,0.12)]"
+            style={{
+              width: '4.25rem',
+              height: '4.25rem',
+              background: 'radial-gradient(circle at 30% 30%, #fffde6 0%, #fff2ab 60%, #f0d87f 100%)',
+              boxShadow: '0 0 50px rgba(250, 235, 130, 0.12)',
+            }}
+          >
+            {/* Craters: positioned using absolute divs inside moon */}
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <div style={{
+                position: 'absolute', left: '10%', top: '18%', width: '10%',
+                height: '10%', borderRadius: '50%', background: 'rgba(0,0,0,0.06)'
+              }} />
+              <div style={{
+                position: 'absolute', left: '58%', top: '30%', width: '8%',
+                height: '8%', borderRadius: '50%', background: 'rgba(0,0,0,0.05)'
+              }} />
+              <div style={{
+                position: 'absolute', left: '40%', top: '10%', width: '6%',
+                height: '6%', borderRadius: '50%', background: 'rgba(0,0,0,0.04)'
+              }} />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Stars + Clouds SVG layer */}
         <svg
           className="w-full h-full"
           viewBox="0 0 1200 700"
           preserveAspectRatio="xMidYMid slice"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
+          style={{ zIndex: -20 }}
         >
           <defs>
-            <radialGradient id="moonGradient" cx="35%" cy="22%">
-              <stop offset="0%" stopColor="#fffbe1" stopOpacity="1" />
-              <stop offset="60%" stopColor="#fff1a6" stopOpacity="0.95" />
-              <stop offset="100%" stopColor="#f0e0a0" stopOpacity="0.85" />
-            </radialGradient>
-
-            <filter id="moonGlow" x="-80%" y="-80%" width="260%" height="260%">
-              <feGaussianBlur stdDeviation="12" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-
             <filter id="cloudBlur" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur stdDeviation="10" />
             </filter>
-
             <linearGradient id="starGrad" x1="0" x2="1">
-              <stop offset="0%" stopColor="#fff2a8" />
+              <stop offset="0%" stopColor="#fff8bf" />
               <stop offset="100%" stopColor="#ffe77a" />
             </linearGradient>
           </defs>
 
-          {/* Moon (top-left) with subtle bob */}
+          {/* clouds group: several clusters with blur and opacity for natural look */}
           <motion.g
-            style={{ filter: 'url(#moonGlow)' }}
-            initial={{ x: -4 }}
-            animate={{ x: [0, 3, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <circle cx="140" cy="110" r="56" fill="url(#moonGradient)" />
-            {/* small craters */}
-            <circle cx="122" cy="100" r="6" fill="rgba(0,0,0,0.06)" />
-            <circle cx="160" cy="125" r="5" fill="rgba(0,0,0,0.05)" />
-            <circle cx="145" cy="90" r="3.5" fill="rgba(0,0,0,0.04)" />
-          </motion.g>
-
-          {/* multiple soft clouds near moon and scattered (animated horizontal drift) */}
-          <motion.g
+            filter="url(#cloudBlur)"
             initial={{ x: 0 }}
-            animate={{ x: [0, -24, 0] }}
-            transition={{ duration: 18, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-            style={{ filter: 'url(#cloudBlur)', opacity: 0.95 }}
+            animate={{ x: [0, -22, 0] }}
+            transition={{ duration: 22, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+            opacity="0.95"
           >
-            {/* cluster 1 - near moon */}
-            <g transform="translate(180,110)" fill="rgba(6,10,18,0.55)">
-              <ellipse cx="0" cy="0" rx="54" ry="22" />
+            <g transform="translate(160,120)" fill="rgba(7,12,20,0.56)">
+              <ellipse cx="0" cy="0" rx="48" ry="20" />
               <ellipse cx="-36" cy="8" rx="40" ry="18" />
               <ellipse cx="44" cy="12" rx="34" ry="14" />
             </g>
 
-            {/* cluster 2 - more clouds slightly lower */}
-            <g transform="translate(260,160)" fill="rgba(6,10,18,0.30)">
-              <ellipse cx="0" cy="0" rx="80" ry="26" />
-              <ellipse cx="-50" cy="10" rx="60" ry="20" />
+            <g transform="translate(260,170)" fill="rgba(7,12,20,0.36)">
+              <ellipse cx="0" cy="0" rx="90" ry="30" />
+              <ellipse cx="-50" cy="10" rx="66" ry="22" />
               <ellipse cx="60" cy="8" rx="48" ry="18" />
             </g>
 
-            {/* cluster 3 - far right, subtle */}
-            <g transform="translate(920,110)" fill="rgba(6,10,18,0.28)">
+            <g transform="translate(900,110)" fill="rgba(7,12,20,0.30)">
               <ellipse cx="0" cy="0" rx="64" ry="20" />
               <ellipse cx="-40" cy="6" rx="46" ry="16" />
               <ellipse cx="44" cy="8" rx="36" ry="14" />
             </g>
 
-            {/* cluster 4 - lower center */}
-            <g transform="translate(520,220)" fill="rgba(6,10,18,0.22)">
+            <g transform="translate(520,220)" fill="rgba(7,12,20,0.22)">
               <ellipse cx="0" cy="0" rx="120" ry="28" />
               <ellipse cx="-80" cy="10" rx="84" ry="22" />
               <ellipse cx="84" cy="12" rx="72" ry="20" />
             </g>
           </motion.g>
 
-          {/* stars: more density but subtle; twinkle and slight scale */}
-          {stars.map((s, idx) => (
-            <motion.g
-              key={idx}
-              initial={{ opacity: 0.18, scale: 1 }}
-              animate={{ opacity: [0.18, 1, 0.18], scale: [1, 1.12, 1] }}
-              transition={{ duration: 1.6 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
-            >
-              {/* small circular core */}
-              <circle
-                cx={`${s.x}%`}
-                cy={`${s.y}%`}
-                r={s.r}
-                fill="url(#starGrad)"
-                opacity={0.95}
-              />
-              {/* tiny cross to give 'spark' shape for a few stars */}
-              {s.r > 1.2 && (
-                <path
-                  d={`
-                    M ${s.x}% ${s.y - 0.7}%
-                    l 0.001 1.4
-                    M ${s.x - 0.7}% ${s.y}% 
-                    l 1.4 0.001
-                  `}
-                  stroke="#fff9b8"
-                  strokeWidth={0.6}
-                  strokeLinecap="round"
-                  transform=""
-                />
-              )}
-            </motion.g>
-          ))}
-
+          {/* render many stars with slight twinkle and scale */}
+          {stars.map((s, idx) => {
+            // convert percent positions to viewBox coordinates (1200 x 700)
+            const cx = (s.x / 100) * 1200;
+            const cy = (s.y / 100) * 700;
+            return (
+              <motion.g
+                key={idx}
+                initial={{ opacity: 0.18, scale: 1 }}
+                animate={{ opacity: [0.18, 1, 0.18], scale: [1, 1.12, 1] }}
+                transition={{ duration: 1.5 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
+              >
+                <circle cx={cx} cy={cy} r={s.r * 0.9} fill="url(#starGrad)" opacity={0.95} />
+                {/* add tiny sparkle cross for a subset to give variety */}
+                {s.r > 1.15 && (
+                  <g transform={`translate(${cx}, ${cy})`}>
+                    <line x1={-s.r * 0.9} y1={0} x2={s.r * 0.9} y2={0} stroke="#fff7b6" strokeWidth={0.6} strokeLinecap="round" />
+                    <line x1={0} y1={-s.r * 0.9} x2={0} y2={s.r * 0.9} stroke="#fff7b6" strokeWidth={0.6} strokeLinecap="round" />
+                  </g>
+                )}
+              </motion.g>
+            );
+          })}
         </svg>
       </div>
 
