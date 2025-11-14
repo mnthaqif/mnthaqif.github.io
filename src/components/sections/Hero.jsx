@@ -71,6 +71,15 @@ const Hero = () => {
     { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
+  // shooting stars: each has start percent x/y, angle (deg), length (px), duration and delay
+  const shootingStars = [
+    { sx: 10, sy: 6, angle: 22, len: 260, duration: 1.1, delay: 2.4 },
+    { sx: 25, sy: 12, angle: 18, len: 300, duration: 1.2, delay: 6.0 },
+    { sx: 62, sy: 8, angle: 25, len: 320, duration: 1.0, delay: 11.0 },
+    { sx: 80, sy: 16, angle: 20, len: 280, duration: 1.3, delay: 18.0 },
+    { sx: 40, sy: 4, angle: 16, len: 240, duration: 0.95, delay: 24.0 },
+  ];
+
   return (
     <section
       aria-label="Hero"
@@ -118,7 +127,7 @@ const Hero = () => {
         </motion.g>
       </svg>
 
-      {/* Dark-sky: moon (SVG with crescent mask + glow), clouds, stars */}
+      {/* Dark-sky: moon (SVG with crescent mask + glow), clouds, stars, and shooting stars */}
       <div className="absolute inset-0 pointer-events-none -z-20">
         <div className="hidden dark:block w-full h-full">
           {/* crescent moon (SVG) */}
@@ -160,6 +169,13 @@ const Hero = () => {
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
+
+              {/* shooting star gradient */}
+              <linearGradient id="shootGrad" x1="0" x2="1" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+                <stop offset="70%" stopColor="#ffd98a" stopOpacity="0.95" />
+                <stop offset="100%" stopColor="#ffd98a" stopOpacity="0" />
+              </linearGradient>
             </defs>
 
             {/* glow group (applies mask so only halo around visible crescent shows) */}
@@ -211,7 +227,7 @@ const Hero = () => {
                 </filter>
               </defs>
 
-              {/* animate each cluster across the page horizontally using framer-motion for continuous movement */}
+              {/* animate each cluster across the page horizontally */}
               <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)"
                 animate={{ x: [-60, 60, -60] }}
                 transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
@@ -242,7 +258,7 @@ const Hero = () => {
             </svg>
           </motion.div>
 
-          {/* stars + layered cloud detail */}
+          {/* stars + layered cloud detail + shooting stars */}
           <svg
             className="w-full h-full"
             viewBox="0 0 1200 700"
@@ -332,12 +348,69 @@ const Hero = () => {
                   transition={{ duration: 1.4 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
                 >
                   <circle cx={cx + jitterX} cy={cy + jitterY} r={s.r * 0.9} fill="url(#starGrad2)" opacity={0.95} />
-                  {s.r > 1.15 && (
-                    <g transform={`translate(${cx + jitterX}, ${cy + jitterY})`}>
-                      <line x1={-s.r * 0.9} y1={0} x2={s.r * 0.9} y2={0} stroke="#fff7b6" strokeWidth={0.55} strokeLinecap="round" />
-                      <line x1={0} y1={-s.r * 0.9} x2={0} y2={s.r * 0.9} stroke="#fff7b6" strokeWidth={0.55} strokeLinecap="round" />
-                    </g>
-                  )}
+                </motion.g>
+              );
+            })}
+
+            {/* shooting stars (appear occasionally, animated across the sky) */}
+            {shootingStars.map((st, i) => {
+              // Convert percent start to viewbox coordinates
+              const startX = (st.sx / 100) * 1200;
+              const startY = (st.sy / 100) * 700;
+              // compute end offsets using angle and length
+              const rad = (st.angle * Math.PI) / 180;
+              const dx = Math.cos(rad) * st.len;
+              const dy = Math.sin(rad) * st.len;
+              // We'll animate the star by moving a short bright line across dx/dy with fade
+              return (
+                <motion.g
+                  key={`shoot-${i}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{
+                    repeat: Infinity,
+                    delay: st.delay,
+                    duration: st.duration + 0.2,
+                    ease: 'easeOut',
+                    repeatDelay: 8 + i * 3,
+                  }}
+                >
+                  {/* trail - a stroked path that moves from start to end */}
+                  <motion.line
+                    x1={startX}
+                    y1={startY}
+                    x2={startX + dx * 0.12}
+                    y2={startY + dy * 0.12}
+                    stroke="url(#shootGrad)"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                    initial={{ x: 0, y: 0, opacity: 0 }}
+                    animate={{ x: [0, dx], y: [0, dy], opacity: [0.0, 1, 0.0] }}
+                    transition={{
+                      duration: st.duration,
+                      delay: st.delay,
+                      ease: 'easeOut',
+                      repeat: Infinity,
+                      repeatDelay: 10 + i * 4,
+                    }}
+                  />
+                  {/* head - a small bright circle that travels with the line */}
+                  <motion.circle
+                    r={1.8}
+                    fill="#fff"
+                    cx={startX}
+                    cy={startY}
+                    initial={{ x: 0, y: 0, opacity: 0 }}
+                    animate={{ x: [0, dx], y: [0, dy], opacity: [0, 1, 0] }}
+                    transition={{
+                      duration: st.duration,
+                      delay: st.delay,
+                      ease: 'easeOut',
+                      repeat: Infinity,
+                      repeatDelay: 10 + i * 4,
+                    }}
+                    style={{ filter: 'drop-shadow(0 0 6px rgba(255,220,120,0.85))' }}
+                  />
                 </motion.g>
               );
             })}
