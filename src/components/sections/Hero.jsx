@@ -50,7 +50,7 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // star positions (percent-based)
+  // balanced star distribution
   const stars = [
     { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
     { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
@@ -71,25 +71,36 @@ const Hero = () => {
     { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
+  // small smoke-like cloud clusters (percent positions)
+  const smallClouds = [
+    { x: 8, y: 12, scale: 0.6, delay: 0 },
+    { x: 18, y: 6, scale: 0.45, delay: 1.4 },
+    { x: 28, y: 22, scale: 0.5, delay: 0.8 },
+    { x: 38, y: 10, scale: 0.55, delay: 2.2 },
+    { x: 48, y: 18, scale: 0.6, delay: 1.0 },
+    { x: 58, y: 8, scale: 0.4, delay: 1.8 },
+    { x: 68, y: 20, scale: 0.5, delay: 0.6 },
+    { x: 78, y: 12, scale: 0.45, delay: 2.6 },
+    { x: 88, y: 28, scale: 0.5, delay: 1.2 },
+    { x: 14, y: 38, scale: 0.35, delay: 0.9 },
+    { x: 34, y: 44, scale: 0.4, delay: 1.5 },
+    { x: 54, y: 50, scale: 0.5, delay: 0.3 },
+  ];
+
   return (
     <section
       aria-label="Hero"
-      className="min-h-screen flex items-center justify-center relative transition-colors duration-300 overflow-visible"
-      style={{ height: '100vh' }}
+      className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
+      style={{ height: '100vh', overflow: 'visible' }}
     >
-      {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode */}
+      {/* Background gradient */}
       <div
-        className={
-          'absolute inset-0 -z-30 transition-colors duration-300 ' +
-          'bg-gradient-to-b from-sky-300 via-sky-150 to-white ' +
-          'dark:from-slate-900 dark:via-slate-800 dark:to-slate-700'
-        }
+        className="absolute inset-0 -z-30 transition-colors duration-300 bg-gradient-to-b from-sky-300 via-sky-150 to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-700"
       />
 
       {/* subtle blurred background blobs */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ zIndex: -40 }}
+        className="absolute inset-0 w-full h-full pointer-events-none -z-40"
         viewBox="0 0 1200 700"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
@@ -116,6 +127,57 @@ const Hero = () => {
         >
           <ellipse cx="980" cy="300" rx="340" ry="180" fill="#e6fff0" opacity="0.10" />
         </motion.g>
+      </svg>
+
+      {/* Shared small smoke-like clouds layer (subtle, 3D-ish) */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none -z-35"
+        viewBox="0 0 1200 700"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <defs>
+          {/* gradient gives a soft 3D feel (lighter top, darker bottom) */}
+          <linearGradient id="smokeGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.75)" />
+            <stop offset="40%" stopColor="rgba(220,220,225,0.6)" />
+            <stop offset="100%" stopColor="rgba(160,160,170,0.25)" />
+          </linearGradient>
+
+          {/* inner shadow to add some depth to clouds */}
+          <filter id="smokeShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feOffset dx="0" dy="6" result="off" />
+            <feGaussianBlur in="off" stdDeviation="12" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.06  0 0 0 0.5 0" result="shadow"/>
+            <feMerge>
+              <feMergeNode in="shadow" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {smallClouds.map((c, i) => {
+          // convert percent to viewBox coords
+          const cx = (c.x / 100) * 1200;
+          const cy = (c.y / 100) * 700;
+          const s = c.scale;
+          return (
+            <motion.g
+              key={`smoke-${i}`}
+              transform={`translate(${cx}, ${cy}) scale(${s})`}
+              initial={{ y: 0, opacity: 0 }}
+              animate={{ y: [0, -6 + (i % 3), 0], opacity: [0.0, 1, 0.9] }}
+              transition={{ duration: 28 + (i % 5), repeat: Infinity, delay: c.delay, ease: 'easeInOut' }}
+              style={{ filter: 'url(#smokeShadow)', transformOrigin: 'center' }}
+            >
+              {/* 3 overlapping ellipses with slight offsets & gradient fill to simulate 3D puff */}
+              <ellipse cx="-36" cy="0" rx="48" ry="20" fill="url(#smokeGrad)" opacity="0.85" />
+              <ellipse cx="0" cy="-6" rx="64" ry="26" fill="url(#smokeGrad)" opacity="0.9" />
+              <ellipse cx="44" cy="6" rx="40" ry="18" fill="url(#smokeGrad)" opacity="0.8" />
+            </motion.g>
+          );
+        })}
       </svg>
 
       {/* Dark-sky: moon (SVG with crescent mask + glow), clouds, stars */}
