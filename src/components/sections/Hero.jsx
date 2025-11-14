@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
@@ -50,7 +50,7 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // star positions (percent-based)
+  // balanced star distribution
   const stars = [
     { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
     { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
@@ -71,16 +71,80 @@ const Hero = () => {
     { x: 76, y: 58, r: 0.9, d: 0.2 }, { x: 92, y: 52, r: 0.7, d: 0.6 },
   ];
 
-  // shooting stars: start percent x/y, angle (deg), length (px), duration and delay
-  const shootingStars = [
-    { sx: 8, sy: 6, angle: 22, len: 420, duration: 1.05, delay: 2.4 },
-    { sx: 30, sy: 10, angle: 20, len: 480, duration: 1.25, delay: 6.0 },
-    { sx: 52, sy: 7, angle: 24, len: 520, duration: 1.0, delay: 11.0 },
-    { sx: 78, sy: 15, angle: 18, len: 460, duration: 1.3, delay: 18.0 },
-    { sx: 42, sy: 3, angle: 16, len: 400, duration: 0.95, delay: 24.0 },
-    // a couple of rarer slow long ones
-    { sx: 12, sy: 20, angle: 26, len: 680, duration: 1.6, delay: 28.0 },
-  ];
+  // shooting stars state (spawned randomly, not too frequent)
+  const [shootingStars, setShootingStars] = useState([]);
+  const timers = useRef([]);
+
+  useEffect(() => {
+    // spawn one star at random intervals between minDelay and maxDelay (seconds)
+    const minDelay = 6; // seconds
+    const maxDelay = 18; // seconds
+    const maxConcurrent = 2; // don't overcrowd
+
+    let mounted = true;
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function spawnOnce() {
+      if (!mounted) return;
+      setShootingStars((prev) => {
+        if (prev.length >= maxConcurrent) return prev; // limit concurrent
+        // random start near top area (y small) or upper-mid
+        const sx = randomBetween(4, 96); // percent across width
+        const sy = randomBetween(3, 35); // percent from top (keep in sky area)
+        const angle = randomBetween(12, 30); // degrees downward-right
+        const len = randomBetween(380, 760); // px length
+        const duration = randomBetween(0.9, 1.6); // seconds travel time
+        const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        const star = { id, sx, sy, angle, len, duration };
+        return [...prev, star];
+      });
+
+      // schedule removal after the star's duration + a small buffer (handled per-star below)
+    }
+
+    // schedule recurring spawn with random delays
+    function scheduleNext() {
+      if (!mounted) return;
+      const delaySec = randomBetween(minDelay, maxDelay);
+      const t = setTimeout(() => {
+        spawnOnce();
+        scheduleNext();
+      }, delaySec * 1000);
+      timers.current.push(t);
+    }
+
+    scheduleNext();
+
+    // cleanup
+    return () => {
+      mounted = false;
+      timers.current.forEach((t) => clearTimeout(t));
+      timers.current = [];
+    };
+  }, []);
+
+  // remove stars after their animation finishes
+  useEffect(() => {
+    // clear old timers
+    timers.current.forEach((t) => clearTimeout(t));
+    timers.current = [];
+
+    // For each active star, set a timeout to remove it after its duration + buffer
+    shootingStars.forEach((st) => {
+      const removeTimer = setTimeout(() => {
+        setShootingStars((prev) => prev.filter((s) => s.id !== st.id));
+      }, (st.duration + 0.5) * 1000); // small buffer to allow fade-out
+      timers.current.push(removeTimer);
+    });
+
+    return () => {
+      timers.current.forEach((t) => clearTimeout(t));
+      timers.current = [];
+    };
+  }, [shootingStars]);
 
   return (
     <section
@@ -175,7 +239,7 @@ const Hero = () => {
               {/* shooting star gradient + glow */}
               <linearGradient id="shootGrad" x1="0" x2="1" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-                <stop offset="40%" stopColor="#fff8da" stopOpacity="0.9" />
+                <stop offset="40%" stopColor="#fff8da" stopOpacity="0.95" />
                 <stop offset="90%" stopColor="#ffd98a" stopOpacity="0.6" />
                 <stop offset="100%" stopColor="#ffd98a" stopOpacity="0" />
               </linearGradient>
@@ -239,46 +303,26 @@ const Hero = () => {
                 </filter>
               </defs>
 
-              {/* animate each cluster across the page horizontally */}
-              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)"
-                animate={{ x: [-60, 60, -60] }}
-                transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-              >
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)" animate={{ x: [-60, 60, -60] }} transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}>
                 <ellipse cx="300" cy="200" rx="420" ry="160" />
               </motion.g>
 
-              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.20)"
-                animate={{ x: [60, -60, 60] }}
-                transition={{ duration: 72, repeat: Infinity, ease: 'linear', delay: 6 }}
-              >
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.20)" animate={{ x: [60, -60, 60] }} transition={{ duration: 72, repeat: Infinity, ease: 'linear', delay: 6 }}>
                 <ellipse cx="900" cy="320" rx="520" ry="200" />
               </motion.g>
 
-              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.18)"
-                animate={{ x: [-40, 40, -40] }}
-                transition={{ duration: 84, repeat: Infinity, ease: 'linear', delay: 12 }}
-              >
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.18)" animate={{ x: [-40, 40, -40] }} transition={{ duration: 84, repeat: Infinity, ease: 'linear', delay: 12 }}>
                 <ellipse cx="1300" cy="180" rx="360" ry="140" />
               </motion.g>
 
-              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.16)"
-                animate={{ x: [40, -40, 40] }}
-                transition={{ duration: 96, repeat: Infinity, ease: 'linear', delay: 18 }}
-              >
+              <motion.g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.16)" animate={{ x: [40, -40, 40] }} transition={{ duration: 96, repeat: Infinity, ease: 'linear', delay: 18 }}>
                 <ellipse cx="700" cy="520" rx="640" ry="220" />
               </motion.g>
             </svg>
           </motion.div>
 
-          {/* stars + layered cloud detail + shooting stars */}
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 1200 700"
-            preserveAspectRatio="xMidYMid slice"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            style={{ zIndex: -20 }}
-          >
+          {/* stars + layered cloud detail + enhanced shooting stars */}
+          <svg className="w-full h-full" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ zIndex: -20 }}>
             <defs>
               <filter id="cloudBlur2" x="-60%" y="-60%" width="260%" height="260%">
                 <feGaussianBlur stdDeviation="10" />
@@ -290,13 +334,7 @@ const Hero = () => {
               </linearGradient>
             </defs>
 
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, -30, 0] }}
-              transition={{ duration: 26, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.85"
-            >
+            <motion.g filter="url(#cloudBlur2)" initial={{ x: 0 }} animate={{ x: [0, -30, 0] }} transition={{ duration: 26, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} opacity="0.85">
               <g transform="translate(120,100)" fill="rgba(100,100,108,0.54)">
                 <ellipse cx="0" cy="0" rx="76" ry="30" />
                 <ellipse cx="-54" cy="12" rx="64" ry="26" />
@@ -304,13 +342,7 @@ const Hero = () => {
               </g>
             </motion.g>
 
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, -18, 0] }}
-              transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.62"
-            >
+            <motion.g filter="url(#cloudBlur2)" initial={{ x: 0 }} animate={{ x: [0, -18, 0] }} transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} opacity="0.62">
               <g transform="translate(260,160)" fill="rgba(100,100,108,0.42)">
                 <ellipse cx="0" cy="0" rx="140" ry="44" />
                 <ellipse cx="-80" cy="12" rx="96" ry="34" />
@@ -318,13 +350,7 @@ const Hero = () => {
               </g>
             </motion.g>
 
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, 20, 0] }}
-              transition={{ duration: 28, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.48"
-            >
+            <motion.g filter="url(#cloudBlur2)" initial={{ x: 0 }} animate={{ x: [0, 20, 0] }} transition={{ duration: 28, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} opacity="0.48">
               <g transform="translate(920,110)" fill="rgba(100,100,108,0.36)">
                 <ellipse cx="0" cy="0" rx="84" ry="28" />
                 <ellipse cx="-46" cy="8" rx="64" ry="20" />
@@ -332,13 +358,7 @@ const Hero = () => {
               </g>
             </motion.g>
 
-            <motion.g
-              filter="url(#cloudBlur2)"
-              initial={{ x: 0 }}
-              animate={{ x: [0, -12, 0] }}
-              transition={{ duration: 30, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-              opacity="0.34"
-            >
+            <motion.g filter="url(#cloudBlur2)" initial={{ x: 0 }} animate={{ x: [0, -12, 0] }} transition={{ duration: 30, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} opacity="0.34">
               <g transform="translate(520,220)" fill="rgba(100,100,108,0.28)">
                 <ellipse cx="0" cy="0" rx="150" ry="36" />
                 <ellipse cx="-110" cy="10" rx="120" ry="32" />
@@ -364,41 +384,38 @@ const Hero = () => {
               );
             })}
 
-            {/* enhanced shooting stars */}
-            {shootingStars.map((st, i) => {
+            {/* enhanced, randomized shooting stars */}
+            {shootingStars.map((st) => {
               const startX = (st.sx / 100) * 1200;
               const startY = (st.sy / 100) * 700;
               const rad = (st.angle * Math.PI) / 180;
               const dx = Math.cos(rad) * st.len;
               const dy = Math.sin(rad) * st.len;
-              // trail coords relative to group (trail behind head)
               const trailX = -dx * 0.6;
               const trailY = -dy * 0.6;
               const trailLen = Math.hypot(trailX, trailY) || 1;
 
               return (
                 <motion.g
-                  key={`shoot-${i}`}
-                  // group starts at (startX,startY) and moves by (dx,dy)
+                  key={st.id}
                   transform={`translate(${startX}, ${startY})`}
                   initial={{ opacity: 0 }}
                   animate={{ x: [0, dx], y: [0, dy], opacity: [0, 1, 0] }}
                   transition={{
                     duration: st.duration,
-                    delay: st.delay,
+                    delay: 0, // spawn timing is controlled by when the star is added to state
                     ease: 'easeOut',
-                    repeat: Infinity,
-                    repeatDelay: 8 + i * 4,
+                    repeat: 0,
                   }}
                 >
-                  {/* trailing streak (tapered): a line from trail start -> head */}
+                  {/* trailing streak (tapered) */}
                   <motion.line
                     x1={trailX}
                     y1={trailY}
                     x2={0}
                     y2={0}
                     stroke="url(#shootGrad)"
-                    strokeWidth={2.6}
+                    strokeWidth={2.8}
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeDasharray={trailLen}
@@ -407,28 +424,22 @@ const Hero = () => {
                     animate={{ strokeDashoffset: [trailLen, 0], opacity: [0, 1, 0] }}
                     transition={{
                       duration: st.duration,
-                      delay: st.delay,
                       ease: 'easeOut',
-                      repeat: Infinity,
-                      repeatDelay: 8 + i * 4,
                     }}
                   />
 
-                  {/* head - bright glowing dot */}
+                  {/* head - bright glowing dot with bloom */}
                   <motion.circle
                     cx={0}
                     cy={0}
-                    r={2.8}
+                    r={3.2}
                     fill="#fff"
                     style={{ filter: 'url(#shootGlow)' }}
                     initial={{ opacity: 0, scale: 0.6 }}
                     animate={{ opacity: [0, 1, 0], scale: [0.6, 1.0, 0.8] }}
                     transition={{
                       duration: st.duration,
-                      delay: st.delay,
                       ease: 'easeOut',
-                      repeat: Infinity,
-                      repeatDelay: 8 + i * 4,
                     }}
                   />
                 </motion.g>
