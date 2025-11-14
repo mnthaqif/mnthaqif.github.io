@@ -22,7 +22,6 @@ function Typing({ text, speed = 80, className = '' }) {
       <span>{display}</span>
       <motion.span
         aria-hidden="true"
-        // thin caret using currentColor so it follows the text color
         style={{
           display: 'inline-block',
           width: '0.12ch',
@@ -51,18 +50,26 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // star positions (percent-based) so they scale with screen size
+  // more star positions (percent) and subtle delays for twinkle
   const stars = [
     { x: 6, y: 10, r: 1.6, d: 0 },
-    { x: 14, y: 18, r: 1.2, d: 0.3 },
+    { x: 12, y: 20, r: 1.2, d: 0.2 },
     { x: 22, y: 8, r: 1.1, d: 0.6 },
     { x: 30, y: 14, r: 1.3, d: 1.0 },
     { x: 42, y: 6, r: 1.4, d: 0.2 },
-    { x: 58, y: 12, r: 1.2, d: 0.8 },
-    { x: 70, y: 7, r: 1.1, d: 1.1 },
-    { x: 78, y: 18, r: 1.5, d: 0.4 },
+    { x: 50, y: 18, r: 1.1, d: 0.9 },
+    { x: 58, y: 12, r: 1.0, d: 0.8 },
+    { x: 66, y: 7, r: 1.3, d: 1.1 },
+    { x: 74, y: 16, r: 1.2, d: 0.4 },
     { x: 86, y: 9, r: 1.2, d: 0.9 },
-    { x: 94, y: 16, r: 1.0, d: 0.5 },
+    { x: 92, y: 4, r: 1.0, d: 0.7 },
+    { x: 18, y: 28, r: 1.0, d: 1.2 },
+    { x: 28, y: 26, r: 0.9, d: 0.5 },
+    { x: 36, y: 22, r: 1.3, d: 0.3 },
+    { x: 46, y: 30, r: 0.9, d: 1.4 },
+    { x: 76, y: 28, r: 1.0, d: 0.6 },
+    { x: 84, y: 24, r: 1.1, d: 1.0 },
+    { x: 96, y: 22, r: 0.8, d: 0.2 },
   ];
 
   return (
@@ -71,16 +78,16 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
       style={{ height: '100vh' }}
     >
-      {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode (Tailwind handles swap) */}
+      {/* Background gradient: light-blue in light mode, darker gentle gradient in dark mode */}
       <div
         className={
           'absolute inset-0 -z-30 transition-colors duration-300 ' +
-          'bg-gradient-to-b from-sky-300 via-sky-100 to-white ' +
+          'bg-gradient-to-b from-sky-300 via-sky-150 to-white ' +
           'dark:from-slate-900 dark:via-slate-800 dark:to-slate-700'
         }
       />
 
-      {/* subtle blurred background blobs (kept very soft) - behind the dark-sky */}
+      {/* subtle blurred background blobs (kept soft) */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{ zIndex: -40 }}
@@ -97,25 +104,23 @@ const Hero = () => {
 
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ x: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
+          animate={{ x: [0, -12, 0], opacity: [0.12, 0.16, 0.12] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-          style={{ zIndex: -40 }}
         >
-          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#c7eaff" opacity="0.14" />
+          <ellipse cx="140" cy="240" rx="300" ry="150" fill="#c7eaff" opacity="0.12" />
         </motion.g>
 
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ y: [0, -8, 0], opacity: [0.10, 0.14, 0.10] }}
+          animate={{ y: [0, -8, 0], opacity: [0.08, 0.12, 0.08] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-          style={{ zIndex: -40 }}
         >
-          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#e6fff0" opacity="0.10" />
+          <ellipse cx="980" cy="300" rx="340" ry="180" fill="#e6fff0" opacity="0.10" />
         </motion.g>
       </svg>
 
-      {/* Dark-sky (moon, cloud, stars) - only visible in dark mode; placed above blobs and behind content */}
-      <div className="hidden dark:block absolute inset-0 pointer-events-none" style={{ zIndex: -20 }}>
+      {/* Dark-sky: moon, improved clouds and more twinkling stars (visible only in dark mode) */}
+      <div className="hidden dark:block absolute inset-0 pointer-events-none -z-20">
         <svg
           className="w-full h-full"
           viewBox="0 0 1200 700"
@@ -124,64 +129,120 @@ const Hero = () => {
           aria-hidden="true"
         >
           <defs>
-            <radialGradient id="moonG" cx="30%" cy="25%">
-              <stop offset="0%" stopColor="#fff9d9" stopOpacity="1" />
-              <stop offset="100%" stopColor="#f6e7a0" stopOpacity="0.95" />
+            <radialGradient id="moonGradient" cx="35%" cy="22%">
+              <stop offset="0%" stopColor="#fffbe1" stopOpacity="1" />
+              <stop offset="60%" stopColor="#fff1a6" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#f0e0a0" stopOpacity="0.85" />
             </radialGradient>
-            <filter id="moonGlow" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="14" result="b" />
+
+            <filter id="moonGlow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="12" result="b" />
               <feMerge>
                 <feMergeNode in="b" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+
+            <filter id="cloudBlur" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="10" />
+            </filter>
+
+            <linearGradient id="starGrad" x1="0" x2="1">
+              <stop offset="0%" stopColor="#fff2a8" />
+              <stop offset="100%" stopColor="#ffe77a" />
+            </linearGradient>
           </defs>
 
-          {/* moon (top-left area) */}
+          {/* Moon (top-left) with subtle bob */}
           <motion.g
-            initial={{ x: -6 }}
-            animate={{ x: [0, 2, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
             style={{ filter: 'url(#moonGlow)' }}
+            initial={{ x: -4 }}
+            animate={{ x: [0, 3, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <circle cx="160" cy="120" r="46" fill="url(#moonG)" />
-            <circle cx="175" cy="110" r="6" fill="rgba(0,0,0,0.06)" />
-            <circle cx="140" cy="140" r="4" fill="rgba(0,0,0,0.05)" />
+            <circle cx="140" cy="110" r="56" fill="url(#moonGradient)" />
+            {/* small craters */}
+            <circle cx="122" cy="100" r="6" fill="rgba(0,0,0,0.06)" />
+            <circle cx="160" cy="125" r="5" fill="rgba(0,0,0,0.05)" />
+            <circle cx="145" cy="90" r="3.5" fill="rgba(0,0,0,0.04)" />
           </motion.g>
 
-          {/* moving cloud (subtle, near moon) */}
+          {/* multiple soft clouds near moon and scattered (animated horizontal drift) */}
           <motion.g
             initial={{ x: 0 }}
-            animate={{ x: [0, -20, 0] }}
-            transition={{ duration: 10, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-            opacity="0.85"
-            fill="#0b1220"
+            animate={{ x: [0, -24, 0] }}
+            transition={{ duration: 18, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+            style={{ filter: 'url(#cloudBlur)', opacity: 0.95 }}
           >
-            <ellipse cx="230" cy="150" rx="48" ry="20" fill="rgba(10,16,24,0.45)" />
-            <ellipse cx="200" cy="150" rx="34" ry="18" fill="rgba(10,16,24,0.38)" />
-            <ellipse cx="260" cy="155" rx="28" ry="14" fill="rgba(10,16,24,0.35)" />
-            <ellipse cx="220" cy="165" rx="60" ry="18" fill="rgba(10,16,24,0.32)" />
+            {/* cluster 1 - near moon */}
+            <g transform="translate(180,110)" fill="rgba(6,10,18,0.55)">
+              <ellipse cx="0" cy="0" rx="54" ry="22" />
+              <ellipse cx="-36" cy="8" rx="40" ry="18" />
+              <ellipse cx="44" cy="12" rx="34" ry="14" />
+            </g>
+
+            {/* cluster 2 - more clouds slightly lower */}
+            <g transform="translate(260,160)" fill="rgba(6,10,18,0.30)">
+              <ellipse cx="0" cy="0" rx="80" ry="26" />
+              <ellipse cx="-50" cy="10" rx="60" ry="20" />
+              <ellipse cx="60" cy="8" rx="48" ry="18" />
+            </g>
+
+            {/* cluster 3 - far right, subtle */}
+            <g transform="translate(920,110)" fill="rgba(6,10,18,0.28)">
+              <ellipse cx="0" cy="0" rx="64" ry="20" />
+              <ellipse cx="-40" cy="6" rx="46" ry="16" />
+              <ellipse cx="44" cy="8" rx="36" ry="14" />
+            </g>
+
+            {/* cluster 4 - lower center */}
+            <g transform="translate(520,220)" fill="rgba(6,10,18,0.22)">
+              <ellipse cx="0" cy="0" rx="120" ry="28" />
+              <ellipse cx="-80" cy="10" rx="84" ry="22" />
+              <ellipse cx="84" cy="12" rx="72" ry="20" />
+            </g>
           </motion.g>
 
-          {/* stars - positioned across the top half; they twinkle (opacity) and tiny scale */}
+          {/* stars: more density but subtle; twinkle and slight scale */}
           {stars.map((s, idx) => (
-            <motion.circle
+            <motion.g
               key={idx}
-              cx={`${s.x}%`}
-              cy={`${s.y}%`}
-              r={s.r}
-              fill="#ffe77a"
-              initial={{ opacity: 0.2, scale: 1 }}
-              animate={{ opacity: [0.2, 1, 0.2], scale: [1, 1.15, 1] }}
-              transition={{ duration: 1.8 + (s.d || 0), repeat: Infinity, repeatType: 'loop', delay: s.d }}
-            />
+              initial={{ opacity: 0.18, scale: 1 }}
+              animate={{ opacity: [0.18, 1, 0.18], scale: [1, 1.12, 1] }}
+              transition={{ duration: 1.6 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
+            >
+              {/* small circular core */}
+              <circle
+                cx={`${s.x}%`}
+                cy={`${s.y}%`}
+                r={s.r}
+                fill="url(#starGrad)"
+                opacity={0.95}
+              />
+              {/* tiny cross to give 'spark' shape for a few stars */}
+              {s.r > 1.2 && (
+                <path
+                  d={`
+                    M ${s.x}% ${s.y - 0.7}%
+                    l 0.001 1.4
+                    M ${s.x - 0.7}% ${s.y}% 
+                    l 1.4 0.001
+                  `}
+                  stroke="#fff9b8"
+                  strokeWidth={0.6}
+                  strokeLinecap="round"
+                  transform=""
+                />
+              )}
+            </motion.g>
           ))}
+
         </svg>
       </div>
 
       <div className="max-w-4xl mx-auto text-center w-full px-4 relative z-10">
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mx-auto">
-          {/* Avatar with animated wave rings */}
+          {/* Avatar with animated rings */}
           <div className="relative inline-block mx-auto mb-6">
             <motion.span
               aria-hidden="true"
@@ -228,7 +289,7 @@ const Hero = () => {
             />
           </div>
 
-          {/* Name: blue in light mode, white in dark mode; thin blinking caret */}
+          {/* Name */}
           <motion.h1 variants={itemVariant} custom={0.1} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
             <Typing text={personal.name} speed={70} className="text-sky-700 dark:text-white" />
           </motion.h1>
@@ -245,17 +306,17 @@ const Hero = () => {
             {personal.title}
           </motion.p>
 
-          {/* location - larger */}
+          {/* location */}
           <motion.p variants={itemVariant} custom={0.25} className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-4">
             {personal.location}
           </motion.p>
 
-          {/* about - larger */}
+          {/* about */}
           <motion.p variants={itemVariant} custom={0.3} className="max-w-2xl mx-auto text-slate-600 dark:text-slate-400 mb-6 text-lg md:text-xl">
             I build web applications with JavaScript and React. I enjoy solving practical problems and improving my skills.
           </motion.p>
 
-          {/* Social icons: circular backgrounds adapt to light/dark; icons use brand color; larger */}
+          {/* Social icons (kept same) */}
           <motion.div variants={itemVariant} custom={0.4} className="flex justify-center gap-6 flex-wrap">
             <motion.a
               href={personal.github}
