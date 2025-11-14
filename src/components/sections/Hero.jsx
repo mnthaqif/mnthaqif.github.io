@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { resumeData } from '../../data/resumeData';
 import avatar from '../../assets/thaqif.jpg';
 
-/** Typing with blinking caret sized relative to the text (uses em units) */
+/** Typing with blinking caret sized to match the name */
 function Typing({ text, speed = 80, className = '' }) {
   const [display, setDisplay] = useState('');
   useEffect(() => {
@@ -18,19 +18,19 @@ function Typing({ text, speed = 80, className = '' }) {
   }, [text, speed]);
 
   return (
-    <span className={className} style={{ display: 'inline-flex', alignItems: 'center' }}>
-      <span>{display}</span>
-      {/* caret sized using em so it matches the surrounding font-size */}
+    <span className={className} aria-label={text}>
+      {display}
       <motion.span
         aria-hidden="true"
+        // caret sized relative to font-size (uses 1em height)
         style={{
           display: 'inline-block',
-          width: '0.08em',
+          marginLeft: '0.45rem',
+          width: '0.10em',
           height: '1em',
-          marginLeft: '0.32em',
+          verticalAlign: 'middle',
           borderRadius: '2px',
           backgroundColor: 'currentColor',
-          verticalAlign: 'middle',
         }}
         animate={{ opacity: [1, 0, 1] }}
         transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
@@ -58,14 +58,14 @@ const Hero = () => {
       className="min-h-screen flex items-center justify-center relative transition-colors duration-300"
       style={{ height: '100vh' }}
     >
-      {/* vertical gradient background - darker so gradient is clearer; dark mode handled via Tailwind classes */}
+      {/* Vertical gradient background: light-blue in light mode, darker but not too dark in dark mode */}
       <div
         className="absolute inset-0 -z-20 transition-colors duration-300
-                   bg-gradient-to-b from-sky-300 via-sky-200 to-sky-100
-                   dark:from-slate-900 dark:via-slate-800 dark:to-slate-800"
+                   bg-gradient-to-b from-sky-300 via-sky-100 to-white
+                   dark:from-slate-900 dark:via-slate-800 dark:to-slate-700"
       />
 
-      {/* subtle blurred background blobs (no centered oval) */}
+      {/* subtle blurred blobs (kept but low-contrast) */}
       <svg
         className="absolute inset-0 w-full h-full -z-10 pointer-events-none"
         viewBox="0 0 1200 700"
@@ -79,49 +79,53 @@ const Hero = () => {
           </filter>
         </defs>
 
-        {/* left blob - low contrast */}
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ x: [0, -16, 0], opacity: [0.18, 0.24, 0.18] }}
+          animate={{ x: [0, -14, 0], opacity: [0.14, 0.22, 0.14] }}
           transition={{ duration: 12, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#bfeaff" opacity="0.18" />
+          <ellipse cx="160" cy="220" rx="320" ry="180" fill="#bfe7ff" opacity="0.16" />
         </motion.g>
 
-        {/* right blob - low contrast */}
         <motion.g
           filter="url(#blurSoft)"
-          animate={{ y: [0, -12, 0], opacity: [0.14, 0.18, 0.14] }}
+          animate={{ y: [0, -10, 0], opacity: [0.12, 0.18, 0.12] }}
           transition={{ duration: 14, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#dfffe8" opacity="0.14" />
+          <ellipse cx="980" cy="260" rx="340" ry="200" fill="#dfffea" opacity="0.12" />
         </motion.g>
       </svg>
 
       <div className="max-w-4xl mx-auto text-center w-full px-4">
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mx-auto">
+
           {/* Avatar + wave rings */}
-          <div className="relative inline-block mx-auto mb-6">
-            {/* expanding ring 1 (subtle, uses current theme for visibility) */}
+          <div className="relative inline-block mx-auto mb-6" style={{ width: '11rem', height: '11rem' }}>
+            {/* wave ring 1 */}
             <motion.span
               aria-hidden="true"
-              className="absolute rounded-full"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
-                inset: 0,
+                width: '11rem',
+                height: '11rem',
                 borderRadius: '9999px',
-                border: '2px solid rgba(59,130,246,0.16)',
+                boxSizing: 'border-box',
+                border: '2px solid rgba(59,130,246,0.18)',
               }}
               initial={{ scale: 1, opacity: 0.28 }}
               animate={{ scale: [1, 1.9], opacity: [0.28, 0] }}
               transition={{ duration: 2.8, repeat: Infinity, ease: 'easeOut' }}
             />
-            {/* expanding ring 2 (delayed) */}
+
+            {/* wave ring 2 */}
             <motion.span
               aria-hidden="true"
-              className="absolute rounded-full"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
               style={{
-                inset: 0,
+                width: '11rem',
+                height: '11rem',
                 borderRadius: '9999px',
+                boxSizing: 'border-box',
                 border: '2px solid rgba(59,130,246,0.10)',
               }}
               initial={{ scale: 1, opacity: 0.18 }}
@@ -129,62 +133,70 @@ const Hero = () => {
               transition={{ duration: 3.6, repeat: Infinity, ease: 'easeOut', delay: 0.6 }}
             />
 
+            {/* High-resolution, larger avatar (use srcSet if you add a 2x asset). */}
             <motion.img
               variants={itemVariant}
               src={avatar}
+              srcSet={`${avatar} 1x, ${avatar} 2x`}
               alt={personal.name}
-              className="relative z-10 w-36 h-36 md:w-44 md:h-44 rounded-full shadow-2xl object-cover"
+              className="relative z-10 rounded-full shadow-2xl object-cover"
               style={{
-                // help reduce perceived blur: don't scale image up from a smaller source;
-                // prefer to supply a high-res image in src/assets. These flags help rendering
-                imageRendering: 'auto',
-                backfaceVisibility: 'hidden',
-                transform: 'translateZ(0)',
+                width: '8.5rem',
+                height: '8.5rem',
+                border: '4px solid rgba(255,255,255,0.9)',
+                display: 'block',
               }}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, y: [0, -12, 0], scale: [0.98, 1.06, 0.98] }}
-              transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut' }}
-              whileHover={{ scale: 1.12, y: -6 }}
+              loading="eager"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, y: [0, -12, 0], scale: [0.99, 1.08, 0.99] }}
+              transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
+              whileHover={{ scale: 1.14, y: -6 }}
             />
           </div>
 
           {/* Name: blue in light mode, white in dark mode; caret sized to match name */}
           <motion.h1 variants={itemVariant} className="text-4xl md:text-5xl lg:text-6xl font-semibold mb-2">
-            <Typing text={personal.name} speed={70} className="text-sky-700 dark:text-white" />
+            <Typing text={personal.name} speed={66} className="text-sky-700 dark:text-white" />
           </motion.h1>
 
-          {/* Full-Stack Developer: fade-in animation */}
+          {/* Full-Stack Developer: larger and fade-in animation */}
           <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.55 }}
-            className="text-2xl md:text-3xl text-slate-700 dark:text-slate-300 mb-3"
+            variants={itemVariant}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.2 }}
+            className="text-2xl md:text-3xl lg:text-3xl text-slate-700 dark:text-slate-300 mb-3"
           >
-            {personal.title}
+            Full‑Stack Developer
           </motion.p>
 
-          {/* Location larger */}
+          {/* larger location and about */}
           <motion.p variants={itemVariant} className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 mb-4">
             {personal.location}
           </motion.p>
 
-          {/* About me larger */}
           <motion.p variants={itemVariant} className="max-w-2xl mx-auto text-slate-600 dark:text-slate-400 mb-6 text-lg md:text-xl">
             I build web applications with JavaScript and React. I enjoy solving practical problems and improving my skills.
           </motion.p>
 
-          {/* Social icons: circular background that adapts to light/dark, larger size, original icon colors */}
+          {/* Social icons: circular backgrounds, larger, adapt to light/dark; email removed */}
           <motion.div variants={itemVariant} className="flex justify-center gap-6 flex-wrap">
             <motion.a
               href={personal.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
-              aria-label="GitHub"
+              className="flex items-center justify-center rounded-full shadow-sm"
+              style={{
+                width: '4rem',
+                height: '4rem',
+                backgroundColor: 'white',
+                boxShadow: '0 6px 18px rgba(30,41,59,0.08)',
+              }}
               whileHover={{ scale: 1.06, y: -3 }}
+              aria-label="GitHub"
             >
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="#181717" aria-hidden="true">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" clipRule="evenodd"/>
               </svg>
             </motion.a>
 
@@ -192,9 +204,15 @@ const Hero = () => {
               href={personal.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-4 rounded-full bg-white shadow-sm dark:bg-slate-800 flex items-center justify-center"
-              aria-label="LinkedIn"
+              className="flex items-center justify-center rounded-full shadow-sm"
+              style={{
+                width: '4rem',
+                height: '4rem',
+                backgroundColor: 'white',
+                boxShadow: '0 6px 18px rgba(30,41,59,0.08)',
+              }}
               whileHover={{ scale: 1.06, y: -3 }}
+              aria-label="LinkedIn"
             >
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
