@@ -50,7 +50,26 @@ const itemVariant = {
 const Hero = () => {
   const { personal } = resumeData;
 
-  // balanced star distribution
+  // responsiveness: detect small screens (phone / small tablet)
+  const [isSmall, setIsSmall] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 768px)').matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handler = (e) => setIsSmall(e.matches);
+    // older browsers
+    if (mq.addEventListener) mq.addEventListener('change', handler);
+    else mq.addListener(handler);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', handler);
+      else mq.removeListener(handler);
+    };
+  }, []);
+
+  // star positions (percent-based)
   const stars = [
     { x: 4, y: 8, r: 1.1, d: 0.1 }, { x: 10, y: 18, r: 1.3, d: 0.4 },
     { x: 18, y: 6, r: 1.0, d: 0.2 }, { x: 26, y: 14, r: 1.6, d: 0.7 },
@@ -86,6 +105,12 @@ const Hero = () => {
     { x: 34, y: 44, scale: 0.4, delay: 1.5 },
     { x: 54, y: 50, scale: 0.5, delay: 0.3 },
   ];
+
+  // adjust opacities & scales for small screens so clouds read clearer
+  const sharedCloudOpacity = isSmall ? 0.26 : 0.10; // shared overlay
+  const sharedWispOpacity = isSmall ? 0.14 : 0.06;
+  const darkCloudOpacity = isSmall ? 0.48 : 0.34;
+  const smallCloudScaleBoost = isSmall ? 1.18 : 1.0; // slightly bigger small clouds on small screens
 
   return (
     <section
@@ -140,9 +165,9 @@ const Hero = () => {
         <defs>
           {/* gradient gives a soft 3D feel (lighter top, darker bottom) */}
           <linearGradient id="smokeGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.75)" />
-            <stop offset="40%" stopColor="rgba(220,220,225,0.6)" />
-            <stop offset="100%" stopColor="rgba(160,160,170,0.25)" />
+            <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+            <stop offset="40%" stopColor="rgba(220,220,225,0.7)" />
+            <stop offset="100%" stopColor="rgba(160,160,170,0.35)" />
           </linearGradient>
 
           {/* inner shadow to add some depth to clouds */}
@@ -157,24 +182,76 @@ const Hero = () => {
           </filter>
         </defs>
 
+        {/* a few larger shared shapes for atmosphere (use sharedCloudOpacity) */}
+        <g filter="url(#smokeShadow)" fill="url(#smokeGrad)" opacity={sharedCloudOpacity}>
+          <motion.ellipse
+            cx="320"
+            cy="180"
+            rx={isSmall ? 520 : 420}
+            ry={isSmall ? 170 : 140}
+            animate={{ x: [0, -30, 0] }}
+            transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
+            opacity={1}
+          />
+          <motion.ellipse
+            cx="920"
+            cy="300"
+            rx={isSmall ? 640 : 520}
+            ry={isSmall ? 200 : 160}
+            animate={{ x: [0, 30, 0] }}
+            transition={{ duration: 44, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+            opacity={1}
+          />
+          <motion.ellipse
+            cx="1300"
+            cy="140"
+            rx={isSmall ? 460 : 360}
+            ry={isSmall ? 160 : 120}
+            animate={{ x: [0, -22, 0] }}
+            transition={{ duration: 40, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+            opacity={1}
+          />
+        </g>
+
+        {/* small wisps for texture */}
+        <g filter="url(#smokeShadow)" fill="url(#smokeGrad)" opacity={sharedWispOpacity}>
+          <motion.ellipse
+            cx="480"
+            cy="90"
+            rx={isSmall ? 280 : 220}
+            ry={isSmall ? 90 : 70}
+            animate={{ x: [0, -18, 0], opacity: [0.04, 0.08, 0.04] }}
+            transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.ellipse
+            cx="1100"
+            cy="420"
+            rx={isSmall ? 320 : 260}
+            ry={isSmall ? 100 : 80}
+            animate={{ x: [0, 18, 0], opacity: [0.04, 0.08, 0.04] }}
+            transition={{ duration: 34, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+          />
+        </g>
+
+        {/* small, distributed 3D-feel smoke puffs (not dense) */}
         {smallClouds.map((c, i) => {
-          // convert percent to viewBox coords
           const cx = (c.x / 100) * 1200;
           const cy = (c.y / 100) * 700;
-          const s = c.scale;
+          const s = c.scale * smallCloudScaleBoost;
+          const dur = 24 + (i % 5) * 6;
           return (
             <motion.g
               key={`smoke-${i}`}
               transform={`translate(${cx}, ${cy}) scale(${s})`}
               initial={{ y: 0, opacity: 0 }}
-              animate={{ y: [0, -6 + (i % 3), 0], opacity: [0.0, 1, 0.9] }}
-              transition={{ duration: 28 + (i % 5), repeat: Infinity, delay: c.delay, ease: 'easeInOut' }}
+              animate={{ y: [0, -6 + (i % 3), 0], opacity: [0.0, 1, 0.95], rotate: [0, (i % 2) ? 1.4 : -1.2, 0] }}
+              transition={{ duration: dur, repeat: Infinity, delay: c.delay * 0.6, ease: 'easeInOut' }}
               style={{ filter: 'url(#smokeShadow)', transformOrigin: 'center' }}
             >
               {/* 3 overlapping ellipses with slight offsets & gradient fill to simulate 3D puff */}
-              <ellipse cx="-36" cy="0" rx="48" ry="20" fill="url(#smokeGrad)" opacity="0.85" />
-              <ellipse cx="0" cy="-6" rx="64" ry="26" fill="url(#smokeGrad)" opacity="0.9" />
-              <ellipse cx="44" cy="6" rx="40" ry="18" fill="url(#smokeGrad)" opacity="0.8" />
+              <ellipse cx="-36" cy="0" rx="48" ry="20" fill="url(#smokeGrad)" opacity={0.88} />
+              <ellipse cx="0" cy="-6" rx="64" ry="26" fill="url(#smokeGrad)" opacity={0.94} />
+              <ellipse cx="44" cy="6" rx="40" ry="18" fill="url(#smokeGrad)" opacity={0.82} />
             </motion.g>
           );
         })}
@@ -261,7 +338,7 @@ const Hero = () => {
           <motion.div
             aria-hidden="true"
             initial={{ opacity: 0.0 }}
-            animate={{ opacity: [0.0, 0.18, 0.0] }}
+            animate={{ opacity: [0.0, darkCloudOpacity, 0.0] }}
             transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute inset-0 -z-19"
             style={{ pointerEvents: 'none' }}
@@ -273,7 +350,7 @@ const Hero = () => {
                 </filter>
               </defs>
 
-              <g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)">
+              <g filter="url(#cloudBlurFull)" fill="rgba(120,120,125,0.22)" opacity={darkCloudOpacity}>
                 <motion.ellipse
                   cx="300"
                   cy="200"
@@ -400,12 +477,6 @@ const Hero = () => {
                   transition={{ duration: 1.4 + (s.d || 0.2), repeat: Infinity, delay: s.d, ease: 'easeInOut' }}
                 >
                   <circle cx={cx + jitterX} cy={cy + jitterY} r={s.r * 0.9} fill="url(#starGrad2)" opacity={0.95} />
-                  {s.r > 1.15 && (
-                    <g transform={`translate(${cx + jitterX}, ${cy + jitterY})`}>
-                      <line x1={-s.r * 0.9} y1={0} x2={s.r * 0.9} y2={0} stroke="#fff7b6" strokeWidth={0.55} strokeLinecap="round" />
-                      <line x1={0} y1={-s.r * 0.9} x2={0} y2={s.r * 0.9} stroke="#fff7b6" strokeWidth={0.55} strokeLinecap="round" />
-                    </g>
-                  )}
                 </motion.g>
               );
             })}
