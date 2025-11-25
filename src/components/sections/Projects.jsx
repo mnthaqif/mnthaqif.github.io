@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
+// Configuration constants
+const PROJECTS_START_YEAR = 2024;
+const CARD_WIDTH_WITH_GAP = 356; // Card width (340px) + gap (16px)
+const MAX_DOT_INDICATORS = 10;
+
 const truncate = (str = '', max = 90) => (str ? (str.length <= max ? str : str.slice(0, max - 1) + '…') : 'No description provided.');
 
 const formatDate = (dateStr) => {
@@ -69,8 +74,8 @@ const Projects = () => {
         const data = await res.json();
         if (cancelled) return;
 
-        // Filter repos created from 2024 onwards and not forks
-        const startDate = new Date('2024-01-01T00:00:00Z');
+        // Filter repos created from configured year onwards and not forks
+        const startDate = new Date(`${PROJECTS_START_YEAR}-01-01T00:00:00Z`);
         const filtered = data
           .filter(r => !r.fork && new Date(r.created_at) >= startDate)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -106,8 +111,7 @@ const Projects = () => {
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 12);
     
     // Calculate active index for dot indicators
-    const cardWidth = 356; // card width + gap
-    const newIndex = Math.round(scrollLeft / cardWidth);
+    const newIndex = Math.round(scrollLeft / CARD_WIDTH_WITH_GAP);
     setActiveIndex(Math.min(newIndex, repos.length - 1));
   }, [repos.length]);
 
@@ -147,18 +151,16 @@ const Projects = () => {
 
   const scrollByAmount = useCallback((direction) => {
     if (!scrollRef.current) return;
-    const cardWidth = 356; // card width + gap
     scrollRef.current.scrollTo({
-      left: scrollRef.current.scrollLeft + direction * cardWidth,
+      left: scrollRef.current.scrollLeft + direction * CARD_WIDTH_WITH_GAP,
       behavior: 'smooth',
     });
   }, []);
 
   const scrollToIndex = useCallback((index) => {
     if (!scrollRef.current) return;
-    const cardWidth = 356;
     scrollRef.current.scrollTo({
-      left: index * cardWidth,
+      left: index * CARD_WIDTH_WITH_GAP,
       behavior: 'smooth',
     });
   }, []);
@@ -190,13 +192,13 @@ const Projects = () => {
               <path d="M2 17l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Since 2024
+            Since {PROJECTS_START_YEAR}
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-4">
             Featured Projects
           </h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Explore my recent work — projects I&apos;ve built and contributed to since 2024
+            Explore my recent work — projects I&apos;ve built and contributed to since {PROJECTS_START_YEAR}
           </p>
         </motion.div>
 
@@ -274,7 +276,7 @@ const Projects = () => {
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-300 dark:text-slate-600 mb-4">
                 <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <p className="text-slate-500 dark:text-slate-400">No projects found from 2024 onwards</p>
+              <p className="text-slate-500 dark:text-slate-400">No projects found from {PROJECTS_START_YEAR} onwards</p>
             </div>
           )}
 
@@ -382,7 +384,7 @@ const Projects = () => {
         {/* Dot indicators */}
         {!loading && repos.length > 0 && (
           <div className="flex justify-center gap-2 mt-8">
-            {repos.slice(0, Math.min(repos.length, 10)).map((_, index) => (
+            {repos.slice(0, Math.min(repos.length, MAX_DOT_INDICATORS)).map((_, index) => (
               <button
                 key={index}
                 type="button"
@@ -395,8 +397,8 @@ const Projects = () => {
                 }`}
               />
             ))}
-            {repos.length > 10 && (
-              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">+{repos.length - 10} more</span>
+            {repos.length > MAX_DOT_INDICATORS && (
+              <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">+{repos.length - MAX_DOT_INDICATORS} more</span>
             )}
           </div>
         )}
