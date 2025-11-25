@@ -12,4 +12,24 @@
   .section-padding {
     @apply px-6 py-16 md:px-12 lg:px-24 xl:px-32;
   }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .grabbing {
+    cursor: grabbing;
+  }
 }
