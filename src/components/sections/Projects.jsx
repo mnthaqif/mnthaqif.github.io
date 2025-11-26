@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 // Configuration constants
-const PROJECTS_START_YEAR = 2024;
-const CURRENT_YEAR = new Date().getFullYear();
 const GITHUB_USERNAME = 'mnthaqif';
 // Personal Access Token for private repos - should be set as environment variable
 const GITHUB_PAT = import.meta.env.VITE_GITHUB_PAT || '';
@@ -182,15 +180,9 @@ const Projects = () => {
         const data = await res.json();
         if (cancelled) return;
 
-        // Filter repos: private only, created from configured year onwards, and not forks
-        const startDate = new Date(`${PROJECTS_START_YEAR}-01-01T00:00:00Z`);
-        const endDate = new Date(`${CURRENT_YEAR + 1}-01-01T00:00:00Z`);
-        
+        // Filter repos: private only and not forks (show all private projects)
         const filtered = data
-          .filter(r => {
-            const createdAt = new Date(r.created_at);
-            return r.private && !r.fork && createdAt >= startDate && createdAt < endDate;
-          })
+          .filter(r => r.private && !r.fork)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // Fetch languages for each repo (with fallback on error)
@@ -274,13 +266,13 @@ const Projects = () => {
               <path d="M2 17l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {PROJECTS_START_YEAR} - {CURRENT_YEAR}
+            Private Projects
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-4">
             Projects
           </h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
-            Explore my recent work — projects I&apos;ve built and contributed to
+            Explore my private projects — personal work I&apos;ve built and developed
           </p>
           {!loading && repos.length > 0 && (
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">
@@ -315,7 +307,7 @@ const Projects = () => {
             </div>
             <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">No projects found</h3>
             <p className="text-slate-500 dark:text-slate-400 max-w-md">
-              No private repositories found from {PROJECTS_START_YEAR} to {CURRENT_YEAR}.
+              No private repositories found. Please ensure you have the correct GitHub Personal Access Token configured.
             </p>
           </motion.div>
         )}
