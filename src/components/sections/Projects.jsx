@@ -182,14 +182,14 @@ const Projects = () => {
         const data = await res.json();
         if (cancelled) return;
 
-        // Filter repos created from configured year onwards and not forks
+        // Filter repos: private only, created from configured year onwards, and not forks
         const startDate = new Date(`${PROJECTS_START_YEAR}-01-01T00:00:00Z`);
         const endDate = new Date(`${CURRENT_YEAR + 1}-01-01T00:00:00Z`);
         
         const filtered = data
           .filter(r => {
             const createdAt = new Date(r.created_at);
-            return !r.fork && createdAt >= startDate && createdAt < endDate;
+            return r.private && !r.fork && createdAt >= startDate && createdAt < endDate;
           })
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -315,7 +315,7 @@ const Projects = () => {
             </div>
             <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">No projects found</h3>
             <p className="text-slate-500 dark:text-slate-400 max-w-md">
-              No repositories found from {PROJECTS_START_YEAR} to {CURRENT_YEAR}.
+              No private repositories found from {PROJECTS_START_YEAR} to {CURRENT_YEAR}.
             </p>
           </motion.div>
         )}
