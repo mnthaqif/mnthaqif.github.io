@@ -8,7 +8,12 @@ const GITHUB_USERNAME = 'mnthaqif';
 // Personal Access Token for private repos - should be set as environment variable
 const GITHUB_PAT = import.meta.env.VITE_GITHUB_PAT || '';
 
-// Helper function to format repo name nicely
+/**
+ * Format repo name for display by:
+ * 1. Replacing dashes and underscores with spaces
+ * 2. Capitalizing each word
+ * 3. Converting .github.io suffix to "Portfolio"
+ */
 const formatRepoName = (name) => {
   return name
     .replace(/[-_]/g, ' ')
@@ -16,28 +21,35 @@ const formatRepoName = (name) => {
     .replace(/\.github\.io/gi, ' Portfolio');
 };
 
-// Helper function to generate description based on repo name if missing
+/**
+ * Generate a meaningful description based on repo name if no description is provided.
+ * Uses pattern matching to create context-aware descriptions.
+ */
 const generateDescription = (name, language, topics = []) => {
   const formattedName = formatRepoName(name);
   const langPart = language ? ` Built with ${language}.` : '';
   const topicsPart = topics.length > 0 ? ` Features: ${topics.slice(0, 3).join(', ')}.` : '';
-  
-  // Common patterns for auto-generated descriptions
-  const patterns = {
-    portfolio: `Personal portfolio website showcasing projects and skills.${langPart}`,
-    api: `RESTful API service for ${formattedName.replace(/api/i, '').trim()}.${langPart}`,
-    app: `Application project: ${formattedName}.${langPart}${topicsPart}`,
-    bot: `Automated bot for ${formattedName.replace(/bot/i, '').trim()}.${langPart}`,
-    cli: `Command-line tool for ${formattedName.replace(/cli/i, '').trim()}.${langPart}`,
-    web: `Web application: ${formattedName}.${langPart}${topicsPart}`,
-    default: `${formattedName} - A software project.${langPart}${topicsPart}`
-  };
-  
   const lowerName = name.toLowerCase();
-  for (const [key, desc] of Object.entries(patterns)) {
-    if (lowerName.includes(key)) return desc;
+  
+  // Generate description based on detected pattern in name
+  if (lowerName.includes('portfolio')) {
+    return `Personal portfolio website showcasing projects and skills.${langPart}`;
   }
-  return patterns.default;
+  if (lowerName.includes('api')) {
+    return `RESTful API service for ${formattedName.replace(/api/i, '').trim()}.${langPart}`;
+  }
+  if (lowerName.includes('bot')) {
+    return `Automated bot for ${formattedName.replace(/bot/i, '').trim()}.${langPart}`;
+  }
+  if (lowerName.includes('cli')) {
+    return `Command-line tool for ${formattedName.replace(/cli/i, '').trim()}.${langPart}`;
+  }
+  if (lowerName.includes('app') || lowerName.includes('web')) {
+    return `Web application: ${formattedName}.${langPart}${topicsPart}`;
+  }
+  
+  // Default description
+  return `${formattedName} - A software project.${langPart}${topicsPart}`;
 };
 
 // Format date for display
@@ -181,40 +193,38 @@ const Projects = () => {
           })
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // Fetch languages for each repo
+        // Fetch languages for each repo (with fallback on error)
         const reposWithLanguages = await Promise.all(
           filtered.map(async (repo) => {
+            // Base repo data structure
+            const baseRepoData = {
+              id: repo.id,
+              name: repo.name,
+              description: repo.description || generateDescription(repo.name, repo.language, repo.topics),
+              html_url: repo.html_url,
+              language: repo.language,
+              stargazers_count: repo.stargazers_count,
+              forks_count: repo.forks_count,
+              topics: repo.topics || [],
+              created_at: repo.created_at,
+              updated_at: repo.updated_at,
+              isPrivate: repo.private,
+            };
+            
             try {
               const langRes = await fetch(repo.languages_url, { headers });
               const languages = langRes.ok ? await langRes.json() : {};
               return {
-                id: repo.id,
-                name: repo.name,
-                description: repo.description || generateDescription(repo.name, repo.language, repo.topics),
-                html_url: repo.html_url,
-                language: repo.language,
+                ...baseRepoData,
                 languages: Object.keys(languages),
-                stargazers_count: repo.stargazers_count,
-                forks_count: repo.forks_count,
-                topics: repo.topics || [],
-                created_at: repo.created_at,
-                updated_at: repo.updated_at,
-                isPrivate: repo.private,
               };
-            } catch {
+            } catch (langError) {
+              // Fallback to primary language if languages API fails
+              // This can happen due to rate limiting or network issues
+              console.warn(`Failed to fetch languages for ${repo.name}:`, langError.message);
               return {
-                id: repo.id,
-                name: repo.name,
-                description: repo.description || generateDescription(repo.name, repo.language, repo.topics),
-                html_url: repo.html_url,
-                language: repo.language,
+                ...baseRepoData,
                 languages: repo.language ? [repo.language] : [],
-                stargazers_count: repo.stargazers_count,
-                forks_count: repo.forks_count,
-                topics: repo.topics || [],
-                created_at: repo.created_at,
-                updated_at: repo.updated_at,
-                isPrivate: repo.private,
               };
             }
           })
