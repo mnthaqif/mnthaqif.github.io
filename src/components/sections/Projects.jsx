@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 const GITHUB_USERNAME = 'mnthaqif';
 // Personal Access Token for private repos - should be set as environment variable
 const GITHUB_PAT = import.meta.env.VITE_GITHUB_PAT || '';
+// Filter repos created from this date onwards (ISO 8601 format for string comparison)
+const REPOS_FROM_DATE = '2024-01-01T00:00:00Z';
 
 /**
  * Format repo name for display by:
@@ -180,9 +182,10 @@ const Projects = () => {
         const data = await res.json();
         if (cancelled) return;
 
-        // Filter repos: private only and not forks (show all private projects)
+        // Filter repos: private only, not forks, and created from 2024 onwards
+        // Using string comparison since ISO date strings are lexicographically comparable
         const filtered = data
-          .filter(r => r.private && !r.fork)
+          .filter(r => r.private && !r.fork && r.created_at >= REPOS_FROM_DATE)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         // Fetch languages for each repo (with fallback on error)
