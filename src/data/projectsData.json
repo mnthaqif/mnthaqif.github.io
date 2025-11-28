@@ -1,0 +1,47 @@
+{
+  "lastUpdated": "2025-11-28T06:40:00Z",
+  "repos": [
+    {
+      "id": 1103674591,
+      "name": "OptiTravel",
+      "description": "The app calculates the most efficient route between attractions using the Travelling Salesman Problem (TSP) based on the user's hotel location, implementing nearest-neighbor first and then 2-opt refinement. It should provide multiple itinerary suggestions based on the places the user selects.",
+      "html_url": "https://github.com/mnthaqif/OptiTravel",
+      "language": "TypeScript",
+      "stargazers_count": 1,
+      "forks_count": 0,
+      "topics": ["travel", "route-optimization", "typescript", "react"],
+      "created_at": "2025-11-25T07:24:01Z",
+      "updated_at": "2025-11-28T04:22:16Z",
+      "isPrivate": false,
+      "languages": ["TypeScript", "CSS", "HTML"]
+    },
+    {
+      "id": 1103640935,
+      "name": "MYHealth-Risk",
+      "description": "Malaysia-based Health Risk Calculator that follows MOH guidelines, includes Malaysian Framingham Risk Score interpretation, local BMI categories, blood pressure classification, diabetes risk assessment, and lifestyle recommendation",
+      "html_url": "https://github.com/mnthaqif/MYHealth-Risk",
+      "language": "TypeScript",
+      "stargazers_count": 1,
+      "forks_count": 0,
+      "topics": ["health", "calculator", "typescript", "react", "malaysia"],
+      "created_at": "2025-11-25T06:20:39Z",
+      "updated_at": "2025-11-28T06:35:20Z",
+      "isPrivate": false,
+      "languages": ["TypeScript", "CSS", "HTML"]
+    },
+    {
+      "id": 1101104861,
+      "name": "LeaveSync",
+      "description": "Monitor staff leave, public holidays, and connected leave in one shared calendar. Stay informed, plan better, and avoid overlapping leave",
+      "html_url": "https://github.com/mnthaqif/LeaveSyncV1",
+      "language": "TypeScript",
+      "stargazers_count": 1,
+      "forks_count": 0,
+      "topics": ["leave-management", "calendar", "typescript", "react"],
+      "created_at": "2025-11-21T07:44:13Z",
+      "updated_at": "2025-11-28T06:36:18Z",
+      "isPrivate": false,
+      "languages": ["TypeScript", "CSS", "HTML"]
+    }
+  ]
+}
