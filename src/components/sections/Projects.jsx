@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-
-// Configuration constants
-const GITHUB_USERNAME = 'mnthaqif';
-// Personal Access Token for private repos - should be set as environment variable
-const GITHUB_PAT = import.meta.env.VITE_GITHUB_PAT || '';
+import projectsData from '../../data/projectsData.json';
 
 /**
  * Format repo name for display by:
@@ -19,69 +15,11 @@ const formatRepoName = (name) => {
     .replace(/\.github\.io/gi, ' Portfolio');
 };
 
-/**
- * Generate a meaningful description based on repo name if no description is provided.
- * Uses pattern matching to create context-aware descriptions.
- */
-const generateDescription = (name, language, topics = []) => {
-  const formattedName = formatRepoName(name);
-  const langPart = language ? ` Built with ${language}.` : '';
-  const topicsPart = topics.length > 0 ? ` Features: ${topics.slice(0, 3).join(', ')}.` : '';
-  const lowerName = name.toLowerCase();
-  
-  // Generate description based on detected pattern in name
-  if (lowerName.includes('portfolio')) {
-    return `Personal portfolio website showcasing projects and skills.${langPart}`;
-  }
-  if (lowerName.includes('api')) {
-    return `RESTful API service for ${formattedName.replace(/api/i, '').trim()}.${langPart}`;
-  }
-  if (lowerName.includes('bot')) {
-    return `Automated bot for ${formattedName.replace(/bot/i, '').trim()}.${langPart}`;
-  }
-  if (lowerName.includes('cli')) {
-    return `Command-line tool for ${formattedName.replace(/cli/i, '').trim()}.${langPart}`;
-  }
-  if (lowerName.includes('app') || lowerName.includes('web')) {
-    return `Web application: ${formattedName}.${langPart}${topicsPart}`;
-  }
-  
-  // Default description
-  return `${formattedName} - A software project.${langPart}${topicsPart}`;
-};
-
 // Format date for display
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
-
-// Skeleton loading card component
-const SkeletonCard = () => (
-  <div
-    className="relative h-full rounded-2xl border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-6 animate-pulse"
-    aria-hidden="true"
-  >
-    <div className="flex items-center justify-between mb-4">
-      <div className="h-5 w-2/3 rounded-lg bg-slate-200 dark:bg-slate-700" />
-      <div className="h-5 w-5 rounded bg-slate-200 dark:bg-slate-700" />
-    </div>
-    <div className="space-y-2 mb-4">
-      <div className="h-4 w-full rounded bg-slate-200 dark:bg-slate-700" />
-      <div className="h-4 w-11/12 rounded bg-slate-200 dark:bg-slate-700" />
-      <div className="h-4 w-3/4 rounded bg-slate-200 dark:bg-slate-700" />
-    </div>
-    <div className="flex gap-2 mb-4">
-      <div className="h-6 w-16 rounded-full bg-slate-200 dark:bg-slate-700" />
-      <div className="h-6 w-20 rounded-full bg-slate-200 dark:bg-slate-700" />
-      <div className="h-6 w-14 rounded-full bg-slate-200 dark:bg-slate-700" />
-    </div>
-    <div className="flex items-center justify-between mt-auto pt-4">
-      <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-700" />
-      <div className="h-9 w-32 rounded-xl bg-slate-200 dark:bg-slate-700" />
-    </div>
-  </div>
-);
 
 // Language color mapping with pastel/soft colors
 const languageColors = {
@@ -129,14 +67,6 @@ const cardVariants = {
   },
 };
 
-// Lock icon component for private repos
-const LockIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400 dark:text-slate-500">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M7 11V7a5 5 0 0110 0v4" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 // GitHub icon component
 const GitHubIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -145,98 +75,8 @@ const GitHubIcon = () => (
 );
 
 const Projects = () => {
-  const [repos, setRepos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
-
-  useEffect(() => {
-    let cancelled = false;
-    
-    const fetchRepos = async () => {
-      setLoading(true);
-      setErrorMsg('');
-      
-      try {
-        const headers = {
-          Accept: 'application/vnd.github+json',
-        };
-        
-        // Add authorization header if PAT is available (for private repos)
-        if (GITHUB_PAT) {
-          headers.Authorization = `Bearer ${GITHUB_PAT}`;
-        }
-
-        // Fetch repos - use /user/repos endpoint if authenticated (includes private repos)
-        const endpoint = GITHUB_PAT 
-          ? 'https://api.github.com/user/repos?per_page=100&sort=created&direction=desc&affiliation=owner'
-          : `https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=created&direction=desc`;
-
-        const res = await fetch(endpoint, { headers });
-        
-        if (!res.ok) {
-          throw new Error(`GitHub API error ${res.status}`);
-        }
-        
-        const data = await res.json();
-        if (cancelled) return;
-
-        // Filter repos: private only and not forks (show all private projects)
-        const filtered = data
-          .filter(r => r.private && !r.fork)
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-        // Fetch languages for each repo (with fallback on error)
-        const reposWithLanguages = await Promise.all(
-          filtered.map(async (repo) => {
-            // Base repo data structure
-            const baseRepoData = {
-              id: repo.id,
-              name: repo.name,
-              description: repo.description || generateDescription(repo.name, repo.language, repo.topics),
-              html_url: repo.html_url,
-              language: repo.language,
-              stargazers_count: repo.stargazers_count,
-              forks_count: repo.forks_count,
-              topics: repo.topics || [],
-              created_at: repo.created_at,
-              updated_at: repo.updated_at,
-              isPrivate: repo.private,
-            };
-            
-            try {
-              const langRes = await fetch(repo.languages_url, { headers });
-              const languages = langRes.ok ? await langRes.json() : {};
-              return {
-                ...baseRepoData,
-                languages: Object.keys(languages),
-              };
-            } catch (langError) {
-              // Fallback to primary language if languages API fails
-              // This can happen due to rate limiting or network issues
-              console.warn(`Failed to fetch languages for ${repo.name}:`, langError.message);
-              return {
-                ...baseRepoData,
-                languages: repo.language ? [repo.language] : [],
-              };
-            }
-          })
-        );
-
-        setRepos(reposWithLanguages);
-      } catch (e) {
-        if (!cancelled) {
-          setErrorMsg(e.message);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchRepos();
-    return () => { cancelled = true; };
-  }, []);
+  // Use static data from JSON file instead of fetching from GitHub API
+  const repos = projectsData.repos;
 
   return (
     <section 
@@ -266,34 +106,23 @@ const Projects = () => {
               <path d="M2 17l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Private Projects
+            My Projects
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-slate-800 dark:text-slate-100 mb-4">
             Projects
           </h2>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
-            Explore my private projects — personal work I&apos;ve built and developed
+            Explore my projects — personal work I&apos;ve built and developed
           </p>
-          {!loading && repos.length > 0 && (
+          {repos.length > 0 && (
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">
               {repos.length} project{repos.length !== 1 ? 's' : ''} found
             </p>
           )}
         </motion.div>
 
-        {/* Loading skeleton grid */}
-        {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="min-h-[320px]">
-                <SkeletonCard />
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Empty state */}
-        {!loading && repos.length === 0 && !errorMsg && (
+        {repos.length === 0 && (
           <motion.div 
             className="flex flex-col items-center justify-center py-16 text-center"
             initial={{ opacity: 0, y: 20 }}
@@ -307,35 +136,13 @@ const Projects = () => {
             </div>
             <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">No projects found</h3>
             <p className="text-slate-500 dark:text-slate-400 max-w-md">
-              No private repositories found. Please ensure you have the correct GitHub Personal Access Token configured.
-            </p>
-          </motion.div>
-        )}
-
-        {/* Error state */}
-        {errorMsg && (
-          <motion.div 
-            className="flex flex-col items-center justify-center py-16 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="w-20 h-20 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-6">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-red-500 dark:text-red-400">
-                <circle cx="12" cy="12" r="10" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="12" y1="8" x2="12" y2="12" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="12" y1="16" x2="12.01" y2="16" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">Unable to load projects</h3>
-            <p className="text-slate-500 dark:text-slate-400 max-w-md">
-              {errorMsg}
+              No projects available at the moment.
             </p>
           </motion.div>
         )}
 
         {/* Projects grid */}
-        {!loading && repos.length > 0 && (
+        {repos.length > 0 && (
           <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             variants={containerVariants}
@@ -360,16 +167,9 @@ const Projects = () => {
                   {/* Header */}
                   <div className="relative flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0 pr-3">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                          {formatRepoName(repo.name)}
-                        </h3>
-                        {repo.isPrivate && (
-                          <span title="Private repository">
-                            <LockIcon />
-                          </span>
-                        )}
-                      </div>
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {formatRepoName(repo.name)}
+                      </h3>
                     </div>
                     
                     {/* Stats */}
