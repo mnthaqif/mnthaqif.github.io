@@ -1,6 +1,34 @@
 {
-  "lastUpdated": "2025-11-28T06:40:00Z",
+  "lastUpdated": "2025-12-02T09:10:00Z",
   "repos": [
+    {
+      "id": 1108253496,
+      "name": "CarCare-Reminder",
+      "description": "CarCare Reminder is a modern, elegant, and user-friendly mobile app designed to help car owners effortlessly manage their vehicle maintenance. The app provides automated reminders for essential services like oil changes, brake checks, battery replacements, tire rotations, and other consumables, based on time or mileage.",
+      "html_url": "https://github.com/mnthaqif/CarCare-Reminder",
+      "language": "TypeScript",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "topics": ["car-maintenance", "reminder", "typescript", "react"],
+      "created_at": "2025-12-02T08:20:51Z",
+      "updated_at": "2025-12-02T09:05:38Z",
+      "isPrivate": false,
+      "languages": ["TypeScript", "CSS", "HTML"]
+    },
+    {
+      "id": 1108260680,
+      "name": "Weather-Pulse",
+      "description": "WeatherPulse is a modern, clean, and visually stunning mobile weather app that delivers real-time weather information with beautiful, dynamic animated backgrounds. The app automatically detects your location and provides accurate weather data, while also allowing you to search for any location worldwide with autocomplete suggestions.",
+      "html_url": "https://github.com/mnthaqif/Weather-Pulse",
+      "language": "TypeScript",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "topics": ["weather", "mobile-app", "typescript", "react"],
+      "created_at": "2025-12-02T08:33:41Z",
+      "updated_at": "2025-12-02T09:00:42Z",
+      "isPrivate": false,
+      "languages": ["TypeScript", "CSS", "HTML"]
+    },
     {
       "id": 1103674591,
       "name": "OptiTravel",
