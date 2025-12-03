@@ -65,6 +65,10 @@ export const generatePDF = () => {
   yPosition += 5;
   pdf.text(`GitHub: ${personal.github}`, margin, yPosition);
   yPosition += 5;
+  if (personal.gitlab) {
+    pdf.text(`GitLab: ${personal.gitlab}`, margin, yPosition);
+    yPosition += 5;
+  }
   if (personal.website) {
     pdf.text(`Website: ${personal.website}`, margin, yPosition);
     yPosition += 5;
