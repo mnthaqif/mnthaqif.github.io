@@ -49,31 +49,36 @@ const AUTOPLAY_INTERVAL = 5000; // Auto-advance interval in milliseconds
 const DRAG_THRESHOLD = 50; // Minimum drag distance in pixels to trigger slide change
 const SWIPE_THRESHOLD = 10000; // Swipe velocity threshold (velocity * distance)
 
-// Carousel slide animation variants
+// 3D Carousel rotation animation variants
 const slideVariants = {
   enter: (direction) => ({
-    x: direction > 0 ? 1000 : -1000,
+    rotateY: direction > 0 ? 90 : -90,
     opacity: 0,
-    scale: 0.8,
+    scale: 0.7,
+    z: -400,
   }),
   center: {
-    x: 0,
+    rotateY: 0,
     opacity: 1,
     scale: 1,
+    z: 0,
     transition: {
-      x: { type: 'spring', stiffness: 300, damping: 30 },
-      opacity: { duration: 0.3 },
-      scale: { duration: 0.3 },
+      rotateY: { type: 'spring', stiffness: 260, damping: 26 },
+      opacity: { duration: 0.4 },
+      scale: { duration: 0.4 },
+      z: { duration: 0.4 },
     },
   },
   exit: (direction) => ({
-    x: direction < 0 ? 1000 : -1000,
+    rotateY: direction < 0 ? 90 : -90,
     opacity: 0,
-    scale: 0.8,
+    scale: 0.7,
+    z: -400,
     transition: {
-      x: { type: 'spring', stiffness: 300, damping: 30 },
-      opacity: { duration: 0.2 },
-      scale: { duration: 0.2 },
+      rotateY: { type: 'spring', stiffness: 260, damping: 26 },
+      opacity: { duration: 0.3 },
+      scale: { duration: 0.3 },
+      z: { duration: 0.3 },
     },
   }),
 };
@@ -271,6 +276,10 @@ const Projects = () => {
           {/* Carousel Slide */}
           <div 
             className="relative h-[520px] md:h-[480px] flex items-center justify-center overflow-hidden"
+            style={{ 
+              perspective: '1500px',
+              perspectiveOrigin: 'center center'
+            }}
             onMouseDown={handleDragStart}
             onMouseUp={handleDragEnd}
             onMouseLeave={() => setIsDragging(false)}
@@ -286,6 +295,10 @@ const Projects = () => {
                 animate="center"
                 exit="exit"
                 className="absolute w-full max-w-3xl px-2 md:px-4"
+                style={{ 
+                  transformStyle: 'preserve-3d',
+                  backfaceVisibility: 'hidden'
+                }}
                 drag={repos.length > 1 ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.2}
