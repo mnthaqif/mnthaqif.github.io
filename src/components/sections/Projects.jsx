@@ -266,7 +266,7 @@ const Projects = () => {
 
                 return (
                   <article
-                    key={`${index}-${position}`}
+                    key={index}
                     className="absolute w-full max-w-2xl px-2 md:px-4"
                     style={style}
                   >
