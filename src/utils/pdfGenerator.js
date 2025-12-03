@@ -53,7 +53,9 @@ export const generatePDF = () => {
   pdf.setFontSize(10);
   pdf.text(`${personal.email} | ${personal.phone} | ${personal.location}`, margin, yPosition);
   yPosition += 6;
-  pdf.text(`${personal.github} | ${personal.linkedin}`, margin, yPosition);
+  pdf.text(`GitHub: ${personal.github}`, margin, yPosition);
+  yPosition += 6;
+  pdf.text(`GitLab: ${personal.gitlab} | LinkedIn: ${personal.linkedin}`, margin, yPosition);
   yPosition += 10;
 
   addLine();

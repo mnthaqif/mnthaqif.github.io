@@ -7,6 +7,7 @@ export const resumeData = {
     location: "Melaka, Malaysia",
     website: "https://mnthaqif.github.io",
     github: "https://github.com/mnthaqif",
+    gitlab: "https://gitlab.com/thaqifrajabctrm",
     linkedin: "https://www.linkedin.com/in/thaqif-rajab/",
   },
   
