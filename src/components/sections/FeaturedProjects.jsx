@@ -30,26 +30,19 @@ const FeaturedProjects = () => {
 
   useEffect(() => {
     // Load projects from local JSON file
-    setLoading(true);
-    try {
-      const repos = projectsDataJson.repos || [];
-      const mapped = repos.map(r => ({
-        id: r.id,
-        name: r.name,
-        html_url: r.html_url,
-        description: r.description,
-        language: r.language,
-        stargazers_count: r.stargazers_count,
-        topics: r.topics || [],
-        featured: true,
-      }));
-      setProjects(mapped);
-    } catch (e) {
-      console.error('Error loading projects:', e);
-      setProjects([]);
-    } finally {
-      setLoading(false);
-    }
+    const repos = projectsDataJson.repos || [];
+    const mapped = repos.map(r => ({
+      id: r.id,
+      name: r.name,
+      html_url: r.html_url,
+      description: r.description,
+      language: r.language,
+      stargazers_count: r.stargazers_count,
+      topics: r.topics || [],
+      featured: true,
+    }));
+    setProjects(mapped);
+    setLoading(false);
   }, []);
 
   // Drag scrolling
