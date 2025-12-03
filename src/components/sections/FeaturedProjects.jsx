@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import projectsDataJson from '../../data/projectsData.json';
 
 const truncate = (str = '', max = 120) => (str.length <= max ? str : str.slice(0, max - 1) + '…');
 
@@ -17,77 +18,31 @@ const SkeletonCard = () => (
 
 /**
  * Featured Projects Carousel
- * Configure 'featuredRepoNames' with the exact repo names you want to highlight.
+ * Now using local projectsData.json for featured projects
  */
 const FeaturedProjects = () => {
-  const featuredRepoNames = [
-    // EDIT THIS LIST TO MATCH THE REPOS YOU WANT TO SHOW
-    'mnthaqif.github.io',
-    // 'another-repo',
-    // 'cool-app',
-  ];
-
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
   const scrollRef = useRef(null);
   const isPointerDown = useRef(false);
   const dragStartX = useRef(0);
   const initialScrollLeft = useRef(0);
 
-  // Fallback featured projects (customize freely)
-  const fallbackFeatured = [
-    {
-      id: 'fallback-portfolio',
-      name: 'Portfolio Site',
-      html_url: 'https://github.com/mnthaqif/mnthaqif.github.io',
-      description: 'Personal portfolio with animated hero, night sky, crescent moon, shooting stars, and featured sections.',
-      language: 'JavaScript',
-      stargazers_count: 0,
-      topics: ['react', 'animation', 'framer-motion'],
-      featured: true,
-    },
-  ];
-
   useEffect(() => {
-    let cancelled = false;
-    const fetchFeatured = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch('https://api.github.com/users/mnthaqif/repos?per_page=50', {
-          headers: { Accept: 'application/vnd.github+json' },
-        });
-        if (!res.ok) throw new Error(`GitHub API error ${res.status}`);
-        const data = await res.json();
-        if (cancelled) return;
-
-        // Filter only the repos listed in featuredRepoNames (case-insensitive)
-        const filtered = data.filter(
-          r => featuredRepoNames.some(name => name.toLowerCase() === r.name.toLowerCase())
-        );
-
-        const mapped = filtered.map(r => ({
-          id: r.id,
-          name: r.name,
-            html_url: r.html_url,
-            description: r.description,
-            language: r.language,
-            stargazers_count: r.stargazers_count,
-            topics: r.topics || [],
-            featured: true,
-        }));
-
-        setProjects(mapped.length ? mapped : fallbackFeatured);
-      } catch (e) {
-        setErrorMsg(e.message);
-        setProjects(fallbackFeatured);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    fetchFeatured();
-    return () => { cancelled = true; };
+    // Load projects from local JSON file
+    const repos = projectsDataJson.repos || [];
+    const mapped = repos.map(r => ({
+      id: r.id,
+      name: r.name,
+      html_url: r.html_url,
+      description: r.description,
+      language: r.language,
+      stargazers_count: r.stargazers_count,
+      topics: r.topics || [],
+      featured: true,
+    }));
+    setProjects(mapped);
+    setLoading(false);
   }, []);
 
   // Drag scrolling
@@ -237,10 +192,6 @@ const FeaturedProjects = () => {
             );
           })}
         </div>
-
-        {errorMsg && (
-          <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">Showing fallback featured project (reason: {errorMsg})</p>
-        )}
       </div>
     </section>
   );
