@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import projectsData from '../../data/projectsData.json';
 
 /**
@@ -46,41 +46,28 @@ const languageColors = {
 
 // Carousel configuration constants
 const AUTOPLAY_INTERVAL = 5000; // Auto-advance interval in milliseconds
-const DRAG_THRESHOLD = 50; // Minimum drag distance in pixels to trigger slide change
-const SWIPE_THRESHOLD = 10000; // Swipe velocity threshold (velocity * distance)
 
-// 3D Carousel rotation animation variants
-const slideVariants = {
-  enter: (direction) => ({
-    rotateY: direction > 0 ? 90 : -90,
-    opacity: 0,
-    scale: 0.7,
-    z: -400,
-  }),
-  center: {
-    rotateY: 0,
-    opacity: 1,
-    scale: 1,
-    z: 0,
-    transition: {
-      rotateY: { type: 'spring', stiffness: 260, damping: 26 },
-      opacity: { duration: 0.4 },
-      scale: { duration: 0.4 },
-      z: { duration: 0.4 },
-    },
-  },
-  exit: (direction) => ({
-    rotateY: direction < 0 ? 90 : -90,
-    opacity: 0,
-    scale: 0.7,
-    z: -400,
-    transition: {
-      rotateY: { type: 'spring', stiffness: 260, damping: 26 },
-      opacity: { duration: 0.3 },
-      scale: { duration: 0.3 },
-      z: { duration: 0.3 },
-    },
-  }),
+// 3D Carousel card position calculation - wheel rotation style
+const getCardStyle = (position, repos) => {
+  // Only show 3 cards: left (-1), center (0), right (1)
+  if (Math.abs(position) > 1) {
+    return { display: 'none' };
+  }
+
+  const angle = position * 35; // 35 degrees rotation between cards
+  const translateZ = position === 0 ? 0 : -200; // Center card forward, side cards back
+  const translateX = position * 45; // Horizontal spacing (percentage)
+  const scale = position === 0 ? 1 : 0.85; // Center card larger
+  const opacity = position === 0 ? 1 : 0.6; // Center card fully visible
+  const zIndex = position === 0 ? 10 : 5 - Math.abs(position); // Center card on top
+
+  return {
+    transform: `translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${-angle}deg) scale(${scale})`,
+    opacity,
+    zIndex,
+    pointerEvents: position === 0 ? 'auto' : 'none', // Only center card is interactive
+    transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+  };
 };
 
 // GitHub icon component
@@ -121,18 +108,16 @@ const NavButton = ({ direction, onClick, totalProjects }) => {
 
 const Projects = () => {
   const repos = projectsData.repos;
-  const [[currentIndex, direction], setPage] = useState([0, 0]);
-  const [isDragging, setIsDragging] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const dragStartX = useRef(0);
   const carouselRef = useRef(null);
 
   // Calculate the actual index (wrap around)
   const projectIndex = ((currentIndex % repos.length) + repos.length) % repos.length;
 
   const paginate = useCallback((newDirection) => {
-    setPage([currentIndex + newDirection, newDirection]);
-  }, [currentIndex]);
+    setCurrentIndex(prev => prev + newDirection);
+  }, []);
 
   // Auto-play functionality
   useEffect(() => {
@@ -159,22 +144,14 @@ const Projects = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [paginate]);
 
-  // Drag handlers
-  const handleDragStart = (e) => {
-    setIsDragging(true);
-    dragStartX.current = e.clientX || e.touches?.[0]?.clientX || 0;
-  };
-
-  const handleDragEnd = (e) => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    
-    const endX = e.clientX || e.changedTouches?.[0]?.clientX || 0;
-    const diff = dragStartX.current - endX;
-    
-    if (Math.abs(diff) > DRAG_THRESHOLD) {
-      paginate(diff > 0 ? 1 : -1);
+  // Get visible card indices (show 3 cards: left, center, right)
+  const getVisibleCards = () => {
+    const cards = [];
+    for (let i = -1; i <= 1; i++) {
+      const index = ((currentIndex + i) % repos.length + repos.length) % repos.length;
+      cards.push({ index, position: i });
     }
+    return cards;
   };
 
   if (repos.length === 0) {
@@ -205,9 +182,6 @@ const Projects = () => {
       </section>
     );
   }
-
-  const currentRepo = repos[projectIndex];
-  const displayLanguages = currentRepo.languages?.slice(0, 4) || [];
 
   return (
     <section 
@@ -273,126 +247,114 @@ const Projects = () => {
             </>
           )}
 
-          {/* Carousel Slide */}
+          {/* 3D Carousel Container */}
           <div 
-            className="relative h-[520px] md:h-[480px] flex items-center justify-center overflow-hidden"
+            className="relative h-[560px] md:h-[520px] flex items-center justify-center"
             style={{ 
-              perspective: '1500px',
+              perspective: '2000px',
               perspectiveOrigin: 'center center'
             }}
-            onMouseDown={handleDragStart}
-            onMouseUp={handleDragEnd}
-            onMouseLeave={() => setIsDragging(false)}
-            onTouchStart={handleDragStart}
-            onTouchEnd={handleDragEnd}
           >
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.article
-                key={currentIndex}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="absolute w-full max-w-3xl px-2 md:px-4"
-                style={{ 
-                  transformStyle: 'preserve-3d'
-                }}
-                drag={repos.length > 1 ? "x" : false}
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={(e, { offset, velocity }) => {
-                  const swipe = Math.abs(offset.x) * velocity.x;
-                  if (swipe < -SWIPE_THRESHOLD) {
-                    paginate(1);
-                  } else if (swipe > SWIPE_THRESHOLD) {
-                    paginate(-1);
-                  }
-                }}
-              >
-                <div className="group relative flex flex-col h-full rounded-3xl border-2 border-slate-200/70 dark:border-slate-700/50 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-8 md:p-10 shadow-2xl hover:shadow-3xl dark:shadow-slate-900/50 transition-all duration-300">
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-3xl pointer-events-none" />
-                  
-                  {/* Header */}
-                  <div className="relative flex items-start justify-between mb-6">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h3 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 leading-tight mb-2">
-                        {formatRepoName(currentRepo.name)}
-                      </h3>
-                    </div>
-                    
-                    {/* Stats */}
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      {currentRepo.stargazers_count > 0 && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/30 text-sm font-semibold text-amber-600 dark:text-amber-400" title={`${currentRepo.stargazers_count} stars`}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.401 8.168L12 18.896l-7.335 3.27 1.401-8.168L.132 9.211l8.2-1.193z"/>
-                          </svg>
-                          {currentRepo.stargazers_count}
-                        </span>
-                      )}
-                      {currentRepo.forks_count > 0 && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700 text-sm font-semibold text-slate-600 dark:text-slate-300" title={`${currentRepo.forks_count} forks`}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="18" r="3"/>
-                            <circle cx="6" cy="6" r="3"/>
-                            <circle cx="18" cy="6" r="3"/>
-                            <path d="M18 9v1a2 2 0 01-2 2H8a2 2 0 01-2-2V9M12 12v3"/>
-                          </svg>
-                          {currentRepo.forks_count}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+            <div 
+              className="relative w-full h-full flex items-center justify-center"
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {getVisibleCards().map(({ index, position }) => {
+                const repo = repos[index];
+                const displayLanguages = repo.languages?.slice(0, 4) || [];
+                const style = getCardStyle(position, repos);
 
-                  {/* Description */}
-                  <p className="relative text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                    {currentRepo.description}
-                  </p>
+                return (
+                  <article
+                    key={`${index}-${position}`}
+                    className="absolute w-full max-w-2xl px-2 md:px-4"
+                    style={style}
+                  >
+                    <div className="group relative flex flex-col h-full rounded-3xl border-2 border-slate-200/70 dark:border-slate-700/50 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 md:p-8 shadow-2xl hover:shadow-3xl dark:shadow-slate-900/50 transition-all duration-300">
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/20 dark:via-purple-500/20 dark:to-pink-500/20 rounded-3xl pointer-events-none" />
+                      
+                      {/* Header */}
+                      <div className="relative flex items-start justify-between mb-4">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <h3 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 leading-tight mb-2">
+                            {formatRepoName(repo.name)}
+                          </h3>
+                        </div>
+                        
+                        {/* Stats */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {repo.stargazers_count > 0 && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-900/30 text-xs font-semibold text-amber-600 dark:text-amber-400" title={`${repo.stargazers_count} stars`}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 .587l3.668 7.431 8.2 1.193-5.934 5.787 1.401 8.168L12 18.896l-7.335 3.27 1.401-8.168L.132 9.211l8.2-1.193z"/>
+                              </svg>
+                              {repo.stargazers_count}
+                            </span>
+                          )}
+                          {repo.forks_count > 0 && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300" title={`${repo.forks_count} forks`}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="18" r="3"/>
+                                <circle cx="6" cy="6" r="3"/>
+                                <circle cx="18" cy="6" r="3"/>
+                                <path d="M18 9v1a2 2 0 01-2 2H8a2 2 0 01-2-2V9M12 12v3"/>
+                              </svg>
+                              {repo.forks_count}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                  {/* Tech stack badges */}
-                  <div className="relative flex flex-wrap gap-2.5 mb-6">
-                    {displayLanguages.map((lang) => {
-                      const style = languageColors[lang] || languageColors.default;
-                      return (
-                        <span
-                          key={lang}
-                          className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-semibold ${style.bg} ${style.text}`}
+                      {/* Description */}
+                      <p className="relative text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-4 line-clamp-3">
+                        {repo.description}
+                      </p>
+
+                      {/* Tech stack badges */}
+                      <div className="relative flex flex-wrap gap-2 mb-4">
+                        {displayLanguages.map((lang) => {
+                          const langStyle = languageColors[lang] || languageColors.default;
+                          return (
+                            <span
+                              key={lang}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${langStyle.bg} ${langStyle.text}`}
+                            >
+                              <span className={`w-2 h-2 rounded-full ${langStyle.dot}`} />
+                              {lang}
+                            </span>
+                          );
+                        })}
+                        {repo.topics?.slice(0, 3).map((topic) => (
+                          <span
+                            key={topic}
+                            className="px-2.5 py-1 rounded-full bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-indigo-900/40 dark:to-sky-900/40 text-xs font-semibold text-indigo-600 dark:text-indigo-300 border border-indigo-100/50 dark:border-indigo-800/30"
+                          >
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Footer */}
+                      <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t-2 border-slate-100 dark:border-slate-700/50 mt-auto">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          Updated {formatDate(repo.updated_at)}
+                        </span>
+                        <a
+                          href={repo.html_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 text-sm font-semibold hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl z-10"
                         >
-                          <span className={`w-2.5 h-2.5 rounded-full ${style.dot}`} />
-                          {lang}
-                        </span>
-                      );
-                    })}
-                    {currentRepo.topics?.slice(0, 3).map((topic) => (
-                      <span
-                        key={topic}
-                        className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-indigo-50 to-sky-50 dark:from-indigo-900/40 dark:to-sky-900/40 text-sm font-semibold text-indigo-600 dark:text-indigo-300 border-2 border-indigo-100/50 dark:border-indigo-800/30"
-                      >
-                        {topic}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t-2 border-slate-100 dark:border-slate-700/50 mt-auto">
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
-                      Updated {formatDate(currentRepo.updated_at)}
-                    </span>
-                    <a
-                      href={currentRepo.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 dark:from-white dark:to-slate-100 text-white dark:text-slate-900 text-base font-semibold hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl z-10"
-                    >
-                      <GitHubIcon />
-                      View Repository
-                    </a>
-                  </div>
-                </div>
-              </motion.article>
-            </AnimatePresence>
+                          <GitHubIcon />
+                          View Repository
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
 
           {/* Pagination Dots */}
@@ -401,7 +363,7 @@ const Projects = () => {
               {repos.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => setPage([index, index > projectIndex ? 1 : -1])}
+                  onClick={() => setCurrentIndex(index)}
                   className={`transition-all duration-300 rounded-full ${
                     index === projectIndex
                       ? 'w-10 h-3 bg-gradient-to-r from-indigo-500 to-purple-500'
