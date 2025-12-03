@@ -44,6 +44,11 @@ const languageColors = {
   default: { bg: 'bg-slate-100 dark:bg-slate-700/40', text: 'text-slate-600 dark:text-slate-300', dot: 'bg-slate-400' },
 };
 
+// Carousel configuration constants
+const AUTOPLAY_INTERVAL = 5000; // Auto-advance interval in milliseconds
+const DRAG_THRESHOLD = 50; // Minimum drag distance in pixels to trigger slide change
+const SWIPE_THRESHOLD = 10000; // Swipe velocity threshold (velocity * distance)
+
 // Carousel slide animation variants
 const slideVariants = {
   enter: (direction) => ({
@@ -81,28 +86,33 @@ const GitHubIcon = () => (
 );
 
 // Navigation button component
-const NavButton = ({ direction, onClick, disabled }) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`absolute top-1/2 -translate-y-1/2 ${direction === 'left' ? '-left-4 md:-left-16' : '-right-4 md:-right-16'} z-10 p-3 md:p-4 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 group`}
-    aria-label={`${direction === 'left' ? 'Previous' : 'Next'} project`}
-  >
-    <svg 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors ${direction === 'right' ? 'rotate-180' : ''}`}
+const NavButton = ({ direction, onClick, totalProjects }) => {
+  // Only disable when there's one or no projects (circular navigation is always enabled)
+  const disabled = totalProjects <= 1;
+  
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`absolute top-1/2 -translate-y-1/2 ${direction === 'left' ? '-left-4 md:-left-16' : '-right-4 md:-right-16'} z-10 p-3 md:p-4 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 group`}
+      aria-label={`${direction === 'left' ? 'Previous' : 'Next'} project`}
     >
-      <path d="M15 18l-6-6 6-6" />
-    </svg>
-  </button>
-);
+      <svg 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={`text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors ${direction === 'right' ? 'rotate-180' : ''}`}
+      >
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+  );
+};
 
 const Projects = () => {
   const repos = projectsData.repos;
@@ -125,7 +135,7 @@ const Projects = () => {
 
     const interval = setInterval(() => {
       paginate(1);
-    }, 5000); // Change slide every 5 seconds
+    }, AUTOPLAY_INTERVAL);
 
     return () => clearInterval(interval);
   }, [repos.length, isPaused, paginate]);
@@ -157,8 +167,7 @@ const Projects = () => {
     const endX = e.clientX || e.changedTouches?.[0]?.clientX || 0;
     const diff = dragStartX.current - endX;
     
-    // Threshold for swipe (50px)
-    if (Math.abs(diff) > 50) {
+    if (Math.abs(diff) > DRAG_THRESHOLD) {
       paginate(diff > 0 ? 1 : -1);
     }
   };
@@ -249,12 +258,12 @@ const Projects = () => {
               <NavButton 
                 direction="left" 
                 onClick={() => paginate(-1)}
-                disabled={false}
+                totalProjects={repos.length}
               />
               <NavButton 
                 direction="right" 
                 onClick={() => paginate(1)}
-                disabled={false}
+                totalProjects={repos.length}
               />
             </>
           )}
@@ -282,9 +291,9 @@ const Projects = () => {
                 dragElastic={0.2}
                 onDragEnd={(e, { offset, velocity }) => {
                   const swipe = Math.abs(offset.x) * velocity.x;
-                  if (swipe < -10000) {
+                  if (swipe < -SWIPE_THRESHOLD) {
                     paginate(1);
-                  } else if (swipe > 10000) {
+                  } else if (swipe > SWIPE_THRESHOLD) {
                     paginate(-1);
                   }
                 }}
