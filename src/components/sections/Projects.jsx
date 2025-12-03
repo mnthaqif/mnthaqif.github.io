@@ -296,8 +296,7 @@ const Projects = () => {
                 exit="exit"
                 className="absolute w-full max-w-3xl px-2 md:px-4"
                 style={{ 
-                  transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden'
+                  transformStyle: 'preserve-3d'
                 }}
                 drag={repos.length > 1 ? "x" : false}
                 dragConstraints={{ left: 0, right: 0 }}
