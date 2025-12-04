@@ -27,7 +27,7 @@ export const generatePDF = () => {
       }
       pdf.text(line, margin, yPosition);
       // Use consistent line height
-      yPosition += (index < lines.length - 1) ? lineHeight : lineHeight;
+      yPosition += lineHeight;
     });
   };
 
@@ -163,24 +163,28 @@ export const generatePDF = () => {
   addText('PROJECTS', 13, true);
   addSpace(2);
   
-  // Transform projectsData.json format to match PDF requirements
-  const projectsFromJson = projectsData.repos.map(repo => ({
-    name: repo.name,
-    description: repo.description,
-    technologies: repo.languages || [],
-    url: repo.html_url,
-    topics: repo.topics || [],
-    language: repo.language
-  }));
+  // Transform projectsData.json format to match PDF requirements with null checks
+  const projectsFromJson = projectsData.repos
+    .filter(repo => repo.name && repo.html_url) // Filter out invalid entries
+    .map(repo => ({
+      name: repo.name,
+      description: repo.description || 'No description available',
+      technologies: repo.languages || [],
+      url: repo.html_url,
+      topics: repo.topics || [],
+      language: repo.language || 'Not specified'
+    }));
   
   projectsFromJson.forEach((project, index) => {
     // Project name with better alignment
     addText(project.name, 11, true);
     addSpace(1);
     
-    // Project description with consistent spacing
-    addText(project.description, 10, false);
-    addSpace(1);
+    // Project description with consistent spacing (with null safety)
+    if (project.description) {
+      addText(project.description, 10, false);
+      addSpace(1);
+    }
     
     // Primary language
     if (project.language) {
