@@ -131,7 +131,7 @@ export const generatePDF = () => {
     addText(`${exp.company}, ${exp.location}`, 10, false);
     addSpace(1);
     addText(`${exp.startDate} - ${exp.endDate}`, 10, false);
-    addSpace(2);
+    addSpace(1);
     // Use standard bullet point (hyphen) which is ATS-friendly
     exp.description.forEach((item, itemIndex) => {
       addText('- ' + item, 10, false);
@@ -162,7 +162,7 @@ export const generatePDF = () => {
       addText(`GPA: ${edu.gpa}`, 10, false);
     }
     if (edu.achievements && edu.achievements.length > 0) {
-      addSpace(2);
+      addSpace(1);
       edu.achievements.forEach((achievement, achievementIndex) => {
         addText('- ' + achievement, 10, false);
         if (achievementIndex < edu.achievements.length - 1) addSpace(1);
