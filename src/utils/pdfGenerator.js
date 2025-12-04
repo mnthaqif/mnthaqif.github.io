@@ -2,6 +2,20 @@ import jsPDF from 'jspdf';
 import { resumeData } from '../data/resumeData';
 import projectsData from '../data/projectsData.json';
 
+// Helper function to transform projectsData.json format to PDF requirements
+const transformProjectData = (repos) => {
+  return repos
+    .filter(repo => repo.name && repo.html_url) // Filter out invalid entries
+    .map(repo => ({
+      name: repo.name,
+      description: repo.description || 'No description available',
+      technologies: repo.languages || [],
+      url: repo.html_url,
+      topics: repo.topics || [],
+      language: repo.language || 'Not specified'
+    }));
+};
+
 export const generatePDF = () => {
   const pdf = new jsPDF();
   const { personal, about, skills, experience, education } = resumeData;
@@ -20,7 +34,7 @@ export const generatePDF = () => {
     pdf.setFontSize(fontSize);
     pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
     const lines = pdf.splitTextToSize(text, maxWidth);
-    lines.forEach((line, index) => {
+    lines.forEach(line => {
       if (yPosition > 270) {
         pdf.addPage();
         yPosition = 20;
@@ -122,7 +136,7 @@ export const generatePDF = () => {
     exp.description.forEach((item, itemIndex) => {
       addText('- ' + item, 10, false);
       // Add minimal space between bullet points
-      if (itemIndex < exp.description.length - 1) addSpace(0.5);
+      if (itemIndex < exp.description.length - 1) addSpace(1);
     });
     if (index < experience.length - 1) addSpace(4);
   });
@@ -151,7 +165,7 @@ export const generatePDF = () => {
       addSpace(2);
       edu.achievements.forEach((achievement, achievementIndex) => {
         addText('- ' + achievement, 10, false);
-        if (achievementIndex < edu.achievements.length - 1) addSpace(0.5);
+        if (achievementIndex < edu.achievements.length - 1) addSpace(1);
       });
     }
     if (index < education.length - 1) addSpace(4);
@@ -163,17 +177,8 @@ export const generatePDF = () => {
   addText('PROJECTS', 13, true);
   addSpace(2);
   
-  // Transform projectsData.json format to match PDF requirements with null checks
-  const projectsFromJson = projectsData.repos
-    .filter(repo => repo.name && repo.html_url) // Filter out invalid entries
-    .map(repo => ({
-      name: repo.name,
-      description: repo.description || 'No description available',
-      technologies: repo.languages || [],
-      url: repo.html_url,
-      topics: repo.topics || [],
-      language: repo.language || 'Not specified'
-    }));
+  // Transform projectsData.json format to match PDF requirements
+  const projectsFromJson = transformProjectData(projectsData.repos);
   
   projectsFromJson.forEach((project, index) => {
     // Project name with better alignment
@@ -189,19 +194,19 @@ export const generatePDF = () => {
     // Primary language
     if (project.language) {
       addText('Primary Language: ' + project.language, 10, false);
-      addSpace(0.5);
+      addSpace(1);
     }
     
     // Technologies/Languages used
     if (project.technologies && project.technologies.length > 0) {
       addText('Technologies: ' + project.technologies.join(', '), 10, false);
-      addSpace(0.5);
+      addSpace(1);
     }
     
     // Topics/Tags
     if (project.topics && project.topics.length > 0) {
       addText('Topics: ' + project.topics.join(', '), 10, false);
-      addSpace(0.5);
+      addSpace(1);
     }
     
     // Project URL
